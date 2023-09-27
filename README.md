@@ -1,3 +1,7 @@
+NOTE: I snagged a copy of this code from LCanady (https://github.com/lcanady/stumptown) to work on as a project to teach myself Python.  He will be credited in my end result, and I highly encourage you to visit his Git, as he'll likely have cooler stuff than me :-)
+
+
+
 # Welcome to Evennia!
 
 This is your game directory, set up to let you start with
