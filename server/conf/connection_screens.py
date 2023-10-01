@@ -72,7 +72,7 @@ CONNECTION_SCREEN = """
     Enter |whelp|n for more info.
 
     WoD Code Created by Digibear.io
-    Modifications by Devil
+    Modifications by Devil, Kaos, and Nitro
     Powered By Evennia v{}""".format(
     utils.get_evennia_version("short")
 )
