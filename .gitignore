@@ -1,0 +1,10 @@
+.venv/
+.venv-home/
+.venv-work/
+
+*.pyc
+__pycache__/
+
+.pytest_cache/
+
+archive/
