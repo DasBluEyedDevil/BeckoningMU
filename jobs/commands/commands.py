@@ -38,7 +38,7 @@ class CmdBucket(MuxCommand):
             except ValueError:
                 self.caller.msg("Usage: bucket/create <name>=<description>")
                 return
-            account = AccountDB.objects.get(id=self.caller.id)
+            account = AccountDB.objects.get(id=self.account.id)
             bucket = Bucket.objects.create(
                 name=name.strip().lower(),
                 description=description.strip(),
