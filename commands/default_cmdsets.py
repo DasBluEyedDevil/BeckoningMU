@@ -22,7 +22,7 @@ from jobs.jobCmdSet import JobCmdSet
 from bbs.CmdSet import CmdSet as CmdBBS
 from .notes import cmdNotes, CmdNoteApprove, CmdNoteProve
 from .dice import dice
-from evennia.contrib.game_systems.multidescer import CmdMultiDesc 
+from evennia.contrib.game_systems.multidescer import CmdMultiDesc
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
     """

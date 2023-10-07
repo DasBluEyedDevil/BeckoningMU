@@ -35,6 +35,7 @@ from evennia.settings_default import *
 # This is the name of your game. Make it catchy!
 SERVERNAME = "The Beckoning - Prague By Night"
 TELNET_PORTS = [6666]
+AMP_PORT = 6006
 INSTALLED_APPS += ('jobs',)
 INSTALLED_APPS += ('bbs',)
 INSTALLED_APPS += ('wiki',)
