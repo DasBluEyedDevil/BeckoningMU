@@ -146,7 +146,7 @@ class CmdBBS(default_cmds.MuxCommand):
             if self.caller.check_permstring(board.read_perm):
                 last_post = board.posts.last()
                 if last_post:
-                    #print(last_post)
+                    print(last_post)
                     datetime_obj = datetime.fromisoformat(
                         str(last_post.created_at))
 
