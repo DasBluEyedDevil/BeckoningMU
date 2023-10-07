@@ -160,7 +160,7 @@ class CmdBBS(default_cmds.MuxCommand):
                 last_post_date = formatted_datetime if last_post else "None"
                 num_posts = board.posts.count()
 
-                #output += ANSIString(str(board.id))
+                output += ANSIString(str(board.id))
 
                 if board.read_perm.lower() not in ["all", "any", "public"]:
                     self.caller.msg(board.read_perm, board.write_perm)
