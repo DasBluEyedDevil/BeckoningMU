@@ -385,7 +385,7 @@ class CmdBBS(default_cmds.MuxCommand):
             self.caller.msg(
                 "You do not have permission to post to this board.")
             return
-        author = AccountDB.objects.get(id=self.caller.id)
+        author = AccountDB.objects.get(id=self.account.id)
         Post.objects.create(author=author, board=board,
                             title=post_title, body=post_body)
         self.caller.msg("Posted to {}.".format(board_name))
@@ -417,7 +417,7 @@ class CmdBBS(default_cmds.MuxCommand):
         if not self.caller.check_permstring(post.read_perm):
             self.caller.msg("You do not have permission to read this post.")
             return
-        author = AccountDB.objects.get(id=self.caller.id)
+        author = AccountDB.objects.get(id=self.account.id)
         Comment.objects.create(
             author=author, post=post, body=comment_body)
 
