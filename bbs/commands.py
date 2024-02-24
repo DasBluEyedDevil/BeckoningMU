@@ -491,41 +491,50 @@ class CmdBBS(default_cmds.MuxCommand):
         pass
 
 
-class classCmdBbRead(MuxCommand):
+class classCmdBbRead(default_cmds.MuxCommand):
     """
-    Read a board, or post from the bbs.  A shortcut for +bb.
+    Read a board, or post from the BBS. A shortcut for +bb.
 
     Usage:
       +bbread <board name or ID>
       +bbread <board name or ID>/<post name or ID>
-
     """
-
     key = "+bbread"
     aliases = ["bbread"]
     locks = "cmd:all()"
     help_category = "BBS"
 
     def func(self):
-        "Implement the command."
-        comment = None
         try:
-            board_name, post_name = self.args.split("/")
-        except ValueError:
-            board_name = self.args
-            post_name = None
+            args = self.args.split("/")
+            board_identifier = args[0]
+            post_identifier = args[1] if len(args) > 1 else None
+            comment_identifier = None
 
-        if post_name:
-            try:
-                post, comment = post_name.split(".")
-            except ValueError:
-                post = post_name
+            if post_identifier and "." in post_identifier:
+                post_identifier, comment_identifier = post_identifier.split(".")
 
-        # call CmdBBS.read_post.
-        if comment:
-            self.caller.execute_cmd(
-                "bb {}/{}.{}".format(board_name, post, comment))
-        elif post_name:
-            self.caller.execute_cmd("bb {}/{}".format(board_name, post))
-        else:
-            self.caller.execute_cmd("bb {}".format(board_name))
+            board = self.get_board(board_identifier)
+            if not board:
+                self.caller.msg("Board not found.")
+                return
+
+            if post_identifier:
+                post = self.get_post(board, post_identifier)
+                if not post:
+                    self.caller.msg("Post not found on the specified board.")
+                    return
+
+                if comment_identifier:
+                    comment = self.get_comment(post, comment_identifier)
+                    if not comment:
+                        self.caller.msg("Comment not found in the specified post.")
+                        return
+                    self.display_comment(comment)
+                else:
+                    self.display_post(post)
+            else:
+                self.display_board(board)
+
+        except ValueError as e:
+            self.caller.msg(f"Error: {str(e)}")
