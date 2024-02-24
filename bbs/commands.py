@@ -299,7 +299,10 @@ class CmdBBS(default_cmds.MuxCommand):
         except Board.DoesNotExist:
             self.caller.msg("No board by that name exists.")
             return
-
+            if board.read_perm == 'all':
+                # Access is granted, proceed with displaying the board or post
+                pass
+            else:
         if not self.caller.check_permstring(board.read_perm):
             self.caller.msg("You do not have permission to view this board.")
             return
@@ -334,27 +337,30 @@ class CmdBBS(default_cmds.MuxCommand):
             except Board.DoesNotExist:
                 self.caller.msg("No board by that name or ID exists.")
                 return
-            self.caller.msg("Board read_perm:", board.read_perm)
-            self.caller.msg("Caller permissions:", self.caller.permissions.all())            
-            if not self.caller.check_permstring(board.read_perm):
-                self.caller.msg(
-                    "You do not have permission to read this board.")
-                return
+            if board.read_perm == 'all':
+                # Access is granted, proceed with displaying the board or post
+                pass
+            else:
+                if not self.caller.check_permstring(board.read_perm):
+                    self.caller.msg("You do not have permission to read this board.")
+                    return
 
             if post_id:
                 try:
-                    try:
-                        post = board.posts.get(id=post_id)
-                    except Post.DoesNotExist:
-                        post = board.posts.get(title=post_id)
+                    post = board.posts.get(id=post_id)
+                except Post.DoesNotExist:
+                    post = board.posts.get(title=post_id)
                 # if the post doesn't exist, just view the board.
                 except Post.DoesNotExist:
                     self.view_board(board_id)
-                    return
+                return
             else:
                 self.view_board(board_id)
                 return
-
+            if board.read_perm == 'all':
+                # Access is granted, proceed with displaying the board or post
+                pass
+            else:
             if not self.caller.check_permstring(board.read_perm):
                 self.caller.msg(
                     "You do not have permission to read this board.")
