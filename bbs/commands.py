@@ -282,7 +282,7 @@ class CmdBBS(default_cmds.MuxCommand):
         output = format_board_posts_output(posts, board)
         self.caller.msg(output)
     
-        def format_board_posts_output(posts, board):
+    def format_board_posts_output(posts, board):
         output = ANSIString("|b=|n"*78) + "\n"
         output += ANSIString(f"**** |w{board.name}|n ****").center(78) + "\n"
         output += ANSIString("|wMessage|n").ljust(35)
