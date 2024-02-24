@@ -250,7 +250,7 @@ class CmdBBS(default_cmds.MuxCommand):
         self.caller.msg("Created board {}.".format(board_name))
 
     def view_board(self, board_name):
-        def self.format_board_posts_output(posts, board):
+        def format_board_posts_output(posts, board):
             output = ANSIString("|b=|n"*78) + "\n"
             output += ANSIString(f"**** |w{board.name}|n ****").center(78) + "\n"
             output += ANSIString("|wMessage|n").ljust(35)
