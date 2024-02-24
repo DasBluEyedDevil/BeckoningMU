@@ -331,7 +331,7 @@ class CmdBBS(default_cmds.MuxCommand):
         except ValueError:
             board_id = args
             post_id = None
-
+        
         if board_id:
             try:
                 try:
@@ -341,41 +341,45 @@ class CmdBBS(default_cmds.MuxCommand):
             except Board.DoesNotExist:
                 self.caller.msg("No board by that name or ID exists.")
                 return
+        
+            # Check permission for the board
             if board.read_perm == 'all':
-                # Access is granted, proceed with displaying the board or post
-                pass
+                pass  # Access is granted
             else:
                 if not self.caller.check_permstring(board.read_perm):
                     self.caller.msg("You do not have permission to read this board.")
                     return
-
+        
+            # Handling post_id presence
             if post_id:
                 try:
                     post = board.posts.get(id=post_id)
                 except Post.DoesNotExist:
                     post = board.posts.get(title=post_id)
-                # if the post doesn't exist, just view the board.
+                # If the post doesn't exist, just view the board
                 except Post.DoesNotExist:
                     self.view_board(board_id)
-                return
+                    return
             else:
                 self.view_board(board_id)
                 return
-            if board.read_perm == 'all':
-                # Access is granted, proceed with displaying the board or post
-                pass
-            else:
-            if not self.caller.check_permstring(board.read_perm):
-                self.caller.msg(
-                    "You do not have permission to read this board.")
-                return
-
+        
+            # This block seems to be redundant and incorrectly placed as it repeats the permission check done above
+            # if board.read_perm == 'all':
+            #     pass  # Access is granted
+            # else:
+            #     if not self.caller.check_permstring(board.read_perm):
+            #         self.caller.msg("You do not have permission to read this board.")
+            #         return
+        
+        # Check permission for the post
         if not post:
             self.caller.msg("No post by that name or ID exists.")
             return
         if not self.caller.check_permstring(post.read_perm):
             self.caller.msg("You do not have permission to read this post.")
             return
+
 
         output = ANSIString("|b=|n"*78) + "\n"
         output += ANSIString("|wTitle:|n {}".format(post.title)).ljust(39)
