@@ -296,8 +296,9 @@ class CmdBBS(default_cmds.MuxCommand):
             output += ANSIString(post.title[:30]).ljust(35)
             output += ANSIString(str(post.created_at.strftime("%Y-%m-%d %H:%M"))).ljust(22)
             output += ANSIString(str(post.author)[:10]).ljust(13)
-            output += ANSIString(str(post.comments.count())).rjust(3) + "\n"    
-            output += ANSIString("|b=|n"*78) + "\n"
+            output += ANSIString(str(post.comments.count())).rjust(3) + "\n"
+            
+        output += ANSIString("|b=|n"*78) + "\n"
         return output
 
 
