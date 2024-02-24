@@ -491,7 +491,7 @@ class CmdBBS(default_cmds.MuxCommand):
         pass
 
 
-class classCmdBbRead(default_cmds.MuxCommand):
+class classCmdBbRead(MuxCommand):
     """
     Read a board, or post from the BBS. A shortcut for +bb.
 
@@ -508,33 +508,33 @@ class classCmdBbRead(default_cmds.MuxCommand):
         try:
             args = self.args.split("/")
             board_identifier = args[0]
-            post_identifier = args[1] if len(args) > 1 else None
+            post_identifier = None if len(args) < 2 else args[1]
             comment_identifier = None
 
+            # Parsing post and comment identifiers if provided
             if post_identifier and "." in post_identifier:
                 post_identifier, comment_identifier = post_identifier.split(".")
 
-            board = self.get_board(board_identifier)
-            if not board:
-                self.caller.msg("Board not found.")
+            # Using existing logic from CmdBBS class for board and post retrieval
+            cmd_bbs = CmdBBS()
+            cmd_bbs.caller = self.caller
+
+            if not board_identifier:
+                cmd_bbs.list_boards()
                 return
 
-            if post_identifier:
-                post = self.get_post(board, post_identifier)
-                if not post:
-                    self.caller.msg("Post not found on the specified board.")
-                    return
+            # Viewing a specific board's posts
+            if not post_identifier:
+                cmd_bbs.view_board(board_identifier)
+                return
 
-                if comment_identifier:
-                    comment = self.get_comment(post, comment_identifier)
-                    if not comment:
-                        self.caller.msg("Comment not found in the specified post.")
-                        return
-                    self.display_comment(comment)
-                else:
-                    self.display_post(post)
-            else:
-                self.display_board(board)
+            # Reading a specific post (and potentially a comment)
+            read_args = board_identifier if not post_identifier else f"{board_identifier}/{post_identifier}"
+            if comment_identifier:
+                read_args += f".{comment_identifier}"
 
-        except ValueError as e:
-            self.caller.msg(f"Error: {str(e)}")
+            cmd_bbs.read_post(read_args)
+
+        except Exception as e:
+            self.caller.msg(f"An error occurred: {str(e)}")
+
