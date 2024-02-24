@@ -299,10 +299,10 @@ class CmdBBS(default_cmds.MuxCommand):
         except Board.DoesNotExist:
             self.caller.msg("No board by that name exists.")
             return
-            if board.read_perm == 'all':
+        if board.read_perm == 'all':
                 # Access is granted, proceed with displaying the board or post
-                pass
-            else:
+            pass
+        else:
         if not self.caller.check_permstring(board.read_perm):
             self.caller.msg("You do not have permission to view this board.")
             return
