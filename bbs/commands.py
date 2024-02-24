@@ -143,7 +143,7 @@ class CmdBBS(default_cmds.MuxCommand):
         output += ANSIString("|b=|n"*78) + "\n"
         datetime_obj = None
         for board in boards:
-            if self.caller.check_permstring(board.read_perm):
+            if board.read_perm == "all" or self.caller.check_permstring(board.read_perm):
                 last_post = board.posts.last()
                 if last_post:
                     print(last_post)
@@ -167,7 +167,7 @@ class CmdBBS(default_cmds.MuxCommand):
                     output += ANSIString("  *  ").ljust(5)
 
                 elif board.write_perm.lower() not in ["all", "any", "public"]:
-                    if self.caller.check_permstring(board.write_perm):
+                    if board.read_perm == "all" or self.caller.check_permstring(board.write_perm):
                         output += ANSIString(" (-) ").ljust(5)
                     else:
                         output += ANSIString("  -  ").ljust(5)
@@ -378,22 +378,29 @@ class CmdBBS(default_cmds.MuxCommand):
         output += "%r" + ANSIString("|b=|n"*78) + "\n"
         self.caller.msg(output)
 
-    def post(self, board_name, post_title, post_body):
-        "Post a new post."
-        board = self.get_name(board_name)
-        if not self.caller.check_permstring(board.write_perm):
-            self.caller.msg(
-                "You do not have permission to post to this board.")
-            return
-        author = AccountDB.objects.get(id=self.caller.id)
-        Post.objects.create(author=author, board=board,
-                            title=post_title, body=post_body)
-        self.caller.msg("Posted to {}.".format(board_name))
-        # notify all connected players who have permission to read the board.
+    from evennia.accounts.models import AccountDB  # Adjust the import path as necessary
 
-        for player in AccountDB.objects.get_connected_accounts():
-            if player.check_permstring(board.read_perm):
-                player.msg("New post on board {}.".format(board_name))
+    def post(self, board_name, post_title, post_body):
+        try:
+            board = Board.objects.get(name=board_name)
+            # Assuming self.caller is a username, find the AccountDB instance
+            # Adjust this line if self.caller represents something else, like a user ID
+            author = AccountDB.objects.get(username=self.caller)
+            
+            new_post = Post(author=author, board=board, title=post_title, body=post_body)
+            new_post.save()
+            self.caller.msg("Your post has been created successfully.")
+            return  # Ensure no further code is executed
+        except Board.DoesNotExist:
+            self.caller.msg(f"Board named '{board_name}' does not exist.")
+        except AccountDB.DoesNotExist:
+            self.caller.msg("Author account not found.")
+        except Exception as e:
+            print(f"Error creating post: {e}")
+            self.caller.msg(f"An error occurred while creating the post: {e}")
+        else:
+            print("User does not have permission to post.")
+            self.caller.msg("You do not have permission to post to this board.")
 
     def comment(self, post_id, comment_body):
         "Comment on a post."
