@@ -248,6 +248,25 @@ class CmdBBS(default_cmds.MuxCommand):
             name=board_name, read_perm=read_perm, write_perm=write_perm)
         self.caller.msg("Created board {}.".format(board_name))
 
+    def format_board_posts_output(posts, board):
+        output = ANSIString("|b=|n"*78) + "\n"
+        output += ANSIString(f"**** |w{board.name}|n ****").center(78) + "\n"
+        output += ANSIString("|wMessage|n").ljust(35)
+        output += ANSIString("|wPosted|n").ljust(22)
+        output += ANSIString("|wBy|n").ljust(13)
+        output += ANSIString("|wComments|n").rjust(3) + "\n"
+        output += ANSIString("|b-|n"*78) + "\n"
+
+        for post in posts:
+            output += ANSIString(str(post.id)).ljust(4)
+            output += ANSIString(post.title[:30]).ljust(35)
+            output += ANSIString(str(post.created_at.strftime("%Y-%m-%d %H:%M"))).ljust(22)
+            output += ANSIString(str(post.author)[:10]).ljust(13)
+            output += ANSIString(str(post.comments.count())).rjust(3) + "\n"
+            
+        output += ANSIString("|b=|n"*78) + "\n"
+        return output
+
     def view_board(self, board_name):
         "View all posts on a board."
         # ==============================================================================
@@ -282,26 +301,6 @@ class CmdBBS(default_cmds.MuxCommand):
         output = format_board_posts_output(posts, board)
         self.caller.msg(output)
     
-    def format_board_posts_output(posts, board):
-        output = ANSIString("|b=|n"*78) + "\n"
-        output += ANSIString(f"**** |w{board.name}|n ****").center(78) + "\n"
-        output += ANSIString("|wMessage|n").ljust(35)
-        output += ANSIString("|wPosted|n").ljust(22)
-        output += ANSIString("|wBy|n").ljust(13)
-        output += ANSIString("|wComments|n").rjust(3) + "\n"
-        output += ANSIString("|b-|n"*78) + "\n"
-
-        for post in posts:
-            output += ANSIString(str(post.id)).ljust(4)
-            output += ANSIString(post.title[:30]).ljust(35)
-            output += ANSIString(str(post.created_at.strftime("%Y-%m-%d %H:%M"))).ljust(22)
-            output += ANSIString(str(post.author)[:10]).ljust(13)
-            output += ANSIString(str(post.comments.count())).rjust(3) + "\n"
-            
-        output += ANSIString("|b=|n"*78) + "\n"
-        return output
-
-
     def read_post(self, args):
         # ==============================================================================
         # Title: Welcome to the game!               Board: Announcements (1/2)
