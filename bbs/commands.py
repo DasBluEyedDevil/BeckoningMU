@@ -261,38 +261,46 @@ class CmdBBS(default_cmds.MuxCommand):
         # =============================================================================
 
         # if no board name is given, list all boards.
-        if not board_name:
-            self.list_boards()
-            return
+    if not board_name:
+        self.list_boards()
+        return
 
-        board = self.get_name(board_name)
-        if not board:
-            self.caller.msg("No board by that name exists.")
-            return
+    try:
+        board = Board.objects.get(name=board_name)
+    except Board.DoesNotExist:
+        self.caller.msg("No board by that name exists.")
+        return
 
-        if not self.caller.check_permstring(board.read_perm):
-            self.caller.msg("You do not have permission to view this board.")
-            return
+    # Assuming your permission system is based on the caller having specific
+    # permissions stored in a field like `read_perm` on the board.
+    if not self.caller.check_permstring(board.read_perm):
+        self.caller.msg("You do not have permission to view this board.")
+        return
 
-        posts = board.posts.all()
-        output = ANSIString("|b=|n"*78) + "\n"
-        output += ANSIString("**** |w{}|n ****".format(board.name)
-                             ).center(78) + "\n"
-        output += ANSIString("|wMessage|n").ljust(35)
-        output += ANSIString("|wPosted|n").ljust(22)
-        output += ANSIString("|wBy|n").ljust(13)
-        output += ANSIString("|wComments|n").rjust(3) + "\n"
-        output += ANSIString("|b-|n"*78) + "\n"
+    # Proceed with listing the posts on the board as before
+    posts = board.posts.all()
+    output = format_board_posts_output(posts, board)
+    self.caller.msg(output)
 
-        for post in posts:
-            output += ANSIString(str(post.id)).ljust(4)
-            output += ANSIString(post.title[:30]).ljust(35)
-            output += ANSIString(str(post.created_at.strftime("%Y-%m-%d %H:%M"))).ljust(22)
-            output += ANSIString(str(post.author)[:10]).ljust(13)
-            output += ANSIString(str(post.comments.count())).rjust(3) + "\n"
-            output += ANSIString("|b=|n"*78) + "\n"
+def format_board_posts_output(posts, board):
+    output = ANSIString("|b=|n"*78) + "\n"
+    output += ANSIString(f"**** |w{board.name}|n ****").center(78) + "\n"
+    output += ANSIString("|wMessage|n").ljust(35)
+    output += ANSIString("|wPosted|n").ljust(22)
+    output += ANSIString("|wBy|n").ljust(13)
+    output += ANSIString("|wComments|n").rjust(3) + "\n"
+    output += ANSIString("|b-|n"*78) + "\n"
 
-        self.caller.msg(output)
+    for post in posts:
+        output += ANSIString(str(post.id)).ljust(4)
+        output += ANSIString(post.title[:30]).ljust(35)
+        output += ANSIString(str(post.created_at.strftime("%Y-%m-%d %H:%M"))).ljust(22)
+        output += ANSIString(str(post.author)[:10]).ljust(13)
+        output += ANSIString(str(post.comments.count())).rjust(3) + "\n"
+
+    output += ANSIString("|b=|n"*78) + "\n"
+    return output
+
 
     def read_post(self, args):
         # ==============================================================================
