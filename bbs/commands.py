@@ -326,6 +326,9 @@ class CmdBBS(default_cmds.MuxCommand):
             except Board.DoesNotExist:
                 self.caller.msg("No board by that name or ID exists.")
                 return
+            # Inside the view_board method before the permission check
+            print(f"Checking read permission for board '{board.name}': {board.read_perm}")
+            print(f"Permissions of caller '{self.caller}': {self.caller.permissions.all()}")
             if not self.caller.check_permstring(board.read_perm):
                 self.caller.msg(
                     "You do not have permission to read this board.")
