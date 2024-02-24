@@ -166,11 +166,11 @@ class CmdBBS(default_cmds.MuxCommand):
                     self.caller.msg(board.read_perm, board.write_perm)
                     output += ANSIString("  *  ").ljust(5)
 
-                if board.write_perm.lower() not in ["all", "any", "public"] and self.caller.check_permstring(board.write_perm):
-                    output += ANSIString(" (-) ").ljust(5)
-                else:
-                    output += ANSIString("  -  ").ljust(5)
-
+                elif board.write_perm.lower() not in ["all", "any", "public"]:
+                    if board.read_perm == "all" or self.caller.check_permstring(board.write_perm):
+                        output += ANSIString(" (-) ").ljust(5)
+                    else:
+                        output += ANSIString("  -  ").ljust(5)
                 else:
                     output += ANSIString("    ").ljust(5)
 
