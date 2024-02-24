@@ -283,14 +283,22 @@ class CmdBBS(default_cmds.MuxCommand):
         if not board_name:
             self.list_boards()
             return
-    
         try:
             board = Board.objects.get(name=board_name)
+            print("Board read_perm:", board.read_perm)  # This should print 'all'
+
+            caller_permissions = self.caller.permissions.all() if hasattr(self.caller, 'permissions') else []
+            print("Caller permissions:", caller_permissions)  # This should print a list of permissions
+    
+            if board.read_perm.lower() == "all" or any(perm.lower() == "all" for perm in caller_permissions):
+                # If this is true, then the permission system is likely not the issue
+                pass  # Normal flow continues from here
+            else:
+                self.caller.msg("You do not have permission to view this board.")
+                return  # Exit if the caller does not have permission
         except Board.DoesNotExist:
             self.caller.msg("No board by that name exists.")
             return
-        self.caller.msg("Board read_perm:", board.read_perm)
-        self.caller.msg("Caller permissions:", self.caller.permissions.all())
 
         if not self.caller.check_permstring(board.read_perm):
             self.caller.msg("You do not have permission to view this board.")
