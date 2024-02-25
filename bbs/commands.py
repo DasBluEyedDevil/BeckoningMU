@@ -42,7 +42,7 @@ class CmdBBS(default_cmds.MuxCommand):
     lock = "cmd:all()"
     help_category = "BBS"
 
-     """
+    """
     Read boards or posts on the BBS.
 
     Usage:
