@@ -96,47 +96,6 @@ class CmdBBS(default_cmds.MuxCommand):
         output = format_post(self, post)
         self.caller.msg(output)
 
-    def format_board_posts_output(self, posts, board):
-        """
-        Helper function to format board posts for display.
-        """
-        output = "|b=|n" * 78 + "\n"
-        output += "|w**** {} ****|n\n".format(board.name).center(78)
-        output += "|wID|n |wTitle|n".ljust(30) + "|wAuthor|n".ljust(20) + "|wDate|n\n"
-        output += "|b-|n" * 78 + "\n"
-        for post in posts:
-            output += "{} | {} | {} | {}\n".format(
-                str(post.id).ljust(5),
-                post.title.ljust(30),
-                str(post.author).ljust(20),
-                post.created_at.strftime("%Y-%m-%d %H:%M")
-            )
-        output += "|b=|n" * 78
-        return output
-    
-    def format_post(self, post):
-        """
-        Helper function to format a single post for display.
-        """
-        output = "|b=|n" * 78 + "\n"
-        output += "|wTitle: |n{}\n".format(post.title)
-        output += "|wAuthor: |n{}\n".format(post.author)
-        output += "|wDate: |n{}\n".format(post.created_at.strftime("%Y-%m-%d %H:%M"))
-        output += "|b-|n" * 78 + "\n"
-        output += "{}\n".format(post.body)
-        output += "|b=|n" * 78
-        # Display comments if any
-        comments = post.comments.all()
-        if comments:
-            output += "\n|wComments:|n\n"
-            for comment in comments:
-                output += "|w{}|n - {}: {}\n".format(
-                    comment.id,
-                    comment.author,
-                    comment.body
-                )
-        return output
-    
     def get_name(self, name):
         try:
             try:
@@ -400,4 +359,43 @@ class CmdBBS(default_cmds.MuxCommand):
         # Code to add the player to a group
         # You would modify self.caller.db.groups here
         pass
-
+def format_board_posts_output(self, posts, board):
+    """
+    Helper function to format board posts for display.
+    """
+    output = "|b=|n" * 78 + "\n"
+    output += "|w**** {} ****|n\n".format(board.name).center(78)
+    output += "|wID|n |wTitle|n".ljust(30) + "|wAuthor|n".ljust(20) + "|wDate|n\n"
+    output += "|b-|n" * 78 + "\n"
+    for post in posts:
+        output += "{} | {} | {} | {}\n".format(
+            str(post.id).ljust(5),
+            post.title.ljust(30),
+            str(post.author).ljust(20),
+            post.created_at.strftime("%Y-%m-%d %H:%M")
+        )
+    output += "|b=|n" * 78
+    return output
+    
+def format_post(self, post):
+    """
+    Helper function to format a single post for display.
+    """
+    output = "|b=|n" * 78 + "\n"
+    output += "|wTitle: |n{}\n".format(post.title)
+    output += "|wAuthor: |n{}\n".format(post.author)
+    output += "|wDate: |n{}\n".format(post.created_at.strftime("%Y-%m-%d %H:%M"))
+    output += "|b-|n" * 78 + "\n"
+    output += "{}\n".format(post.body)
+    output += "|b=|n" * 78
+    # Display comments if any
+    comments = post.comments.all()
+    if comments:
+        output += "\n|wComments:|n\n"
+        for comment in comments:
+            output += "|w{}|n - {}: {}\n".format(
+                comment.id,
+                comment.author,
+                comment.body
+            )
+    return output
