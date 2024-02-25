@@ -57,9 +57,9 @@ class CmdBBS(default_cmds.MuxCommand):
         "List all boards."
         boards = Board.objects.all()
         output = "|b=|n" * 78 + "\n"
-        output += "      |wBoard Name|n".ljust(20)
-        output += "|wLast Post|n".ljust(50)
-        output += "|w# of Messages".ljust(72) + "\n"
+        output += "      |wBoard Name|n".ljust(30)
+        output += "|wLast Post|n".ljust(20)
+        output += "|w# of Messages".ljust(13) + "\n"
         output += "|b=|n" * 78 + "\n"
         for board in boards:
             if board.read_perm == "all" or self.caller.check_permstring(board.read_perm):
