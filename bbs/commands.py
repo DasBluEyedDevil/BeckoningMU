@@ -360,7 +360,7 @@ class Cmdbbread(MuxCommand):
         "View specific board."
         # Format and send board posts
         posts = board.posts.all()
-        output = format_board_posts_output(posts, board)
+        output = format_board_posts_output(self, posts, board)
         self.caller.msg(output)
 
     def read_post(self, board, post_arg):
@@ -374,7 +374,7 @@ class Cmdbbread(MuxCommand):
                 self.caller.msg("Post not found.")
                 return
         # Format and send post
-        output = self.format_post(post)
+        output = format_post(self, post)
         self.caller.msg(output)
 
 def format_board_posts_output(self, posts, board):
