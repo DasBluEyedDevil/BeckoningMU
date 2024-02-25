@@ -38,11 +38,105 @@ class CmdBBS(default_cmds.MuxCommand):
     """
 
     key = "+bbs"
-    aliases = ["+BBS", "bbs", "+bb"]
+    aliases = ["+BBS", "bbs", "+bb", "bb", "bbview", "bbread"]
     lock = "cmd:all()"
     help_category = "BBS"
 
+ """
+    Read boards or posts on the BBS.
 
+    Usage:
+      bbread             - List all boards
+      bbread <board_id>  - View board by id
+      bbread <board_name>- View board by name
+      bbread <board_id>/<post_id>   - Read post by board id and post id
+      bbread <board_name>/<post_id> - Read post by board name and post id
+      bbread <board_name>/<post_name> - Read post by board name and post name
+    """
+    def list_boards(self):
+        "List all boards."
+        boards = Board.objects.all()
+        output = "|b=|n" * 78 + "\n"
+        output += "      |wGroup Name|n".ljust(40)
+        output += "|wLast Post|n".ljust(24)
+        output += "|w# of Messages".ljust(15) + "\n"
+        output += "|b=|n" * 78 + "\n"
+        for board in boards:
+            if board.read_perm == "all" or self.caller.check_permstring(board.read_perm):
+                last_post = board.posts.last()
+                formatted_datetime = "None"
+                if last_post:
+                    formatted_datetime = last_post.created_at.strftime("%Y-%m-%d %H:%M:%S")
+                num_posts = board.posts.count()
+                output += str(board.id).ljust(4)
+                output += board.name[:34].ljust(35)
+                output += formatted_datetime.ljust(22)
+                output += str(num_posts).rjust(13) + "\n"
+        output += "|b=|n" * 78
+        self.caller.msg(output)
+
+    def view_board(self, board):
+        "View specific board."
+        # Format and send board posts
+        posts = board.posts.all()
+        output = format_board_posts_output(self, posts, board)
+        self.caller.msg(output)
+
+    def read_post(self, board, post_arg):
+        "Read specific post."
+        try:
+            post = board.posts.get(id=post_arg)
+        except (Post.DoesNotExist, ValueError):
+            try:
+                post = board.posts.get(title__iexact=post_arg)
+            except Post.DoesNotExist:
+                self.caller.msg("Post not found.")
+                return
+        # Format and send post
+        output = format_post(self, post)
+        self.caller.msg(output)
+
+def format_board_posts_output(self, posts, board):
+    """
+    Helper function to format board posts for display.
+    """
+    output = "|b=|n" * 78 + "\n"
+    output += "|w**** {} ****|n\n".format(board.name).center(78)
+    output += "|wID|n |wTitle|n".ljust(30) + "|wAuthor|n".ljust(20) + "|wDate|n\n"
+    output += "|b-|n" * 78 + "\n"
+    for post in posts:
+        output += "{} | {} | {} | {}\n".format(
+            str(post.id).ljust(5),
+            post.title.ljust(30),
+            str(post.author).ljust(20),
+            post.created_at.strftime("%Y-%m-%d %H:%M")
+        )
+    output += "|b=|n" * 78
+    return output
+
+def format_post(self, post):
+    """
+    Helper function to format a single post for display.
+    """
+    output = "|b=|n" * 78 + "\n"
+    output += "|wTitle: |n{}\n".format(post.title)
+    output += "|wAuthor: |n{}\n".format(post.author)
+    output += "|wDate: |n{}\n".format(post.created_at.strftime("%Y-%m-%d %H:%M"))
+    output += "|b-|n" * 78 + "\n"
+    output += "{}\n".format(post.body)
+    output += "|b=|n" * 78
+    # Display comments if any
+    comments = post.comments.all()
+    if comments:
+        output += "\n|wComments:|n\n"
+        for comment in comments:
+            output += "|w{}|n - {}: {}\n".format(
+                comment.id,
+                comment.author,
+                comment.body
+            )
+    return output
+    
     def get_name(self, name):
         try:
             try:
@@ -61,15 +155,36 @@ class CmdBBS(default_cmds.MuxCommand):
         return board
 
     def func(self):
-        "This will be called when the command is issued."
-        if not self.switches and not self.args:
-            # If no switches or arguments are provided, list all accessible boards
+
+            def func(self):
+        args = self.args.strip()
+
+        # Split arguments
+        try:
+            board_arg, post_arg = args.split("/", 1)
+        except ValueError:
+            board_arg, post_arg = args, None
+
+        # No arguments - List all boards
+        if not board_arg:
             self.list_boards()
             return
-        elif not self.switches and self.args:
-            # If no switches are provided, but arguments are, view the specified board
-            self.read_post(self.args)
-            return
+
+        # Board argument present - Attempt to view board or read post
+        try:
+            board = Board.objects.get(id=board_arg)
+        except (Board.DoesNotExist, ValueError):
+            try:
+                board = Board.objects.get(name__iexact=board_arg)
+            except Board.DoesNotExist:
+                self.caller.msg("Board not found.")
+                return
+
+        # Board found - Check for post argument
+        if post_arg:
+            self.read_post(board, post_arg)
+        else:
+            self.view_board(board)
 
         # Handle different commands
         if "boards" in self.switches:
@@ -288,132 +403,3 @@ class CmdBBS(default_cmds.MuxCommand):
         # You would modify self.caller.db.groups here
         pass
 
-class Cmdbbread(MuxCommand):
-    """
-    Read boards or posts on the BBS.
-
-    Usage:
-      bbread             - List all boards
-      bbread <board_id>  - View board by id
-      bbread <board_name>- View board by name
-      bbread <board_id>/<post_id>   - Read post by board id and post id
-      bbread <board_name>/<post_id> - Read post by board name and post id
-      bbread <board_name>/<post_name> - Read post by board name and post name
-    """
-    key = "+bbs/read"
-    aliases = ["bbread", "bb"]
-    locks = "cmd:all()"
-
-    def func(self):
-        args = self.args.strip()
-
-        # Split arguments
-        try:
-            board_arg, post_arg = args.split("/", 1)
-        except ValueError:
-            board_arg, post_arg = args, None
-
-        # No arguments - List all boards
-        if not board_arg:
-            self.list_boards()
-            return
-
-        # Board argument present - Attempt to view board or read post
-        try:
-            board = Board.objects.get(id=board_arg)
-        except (Board.DoesNotExist, ValueError):
-            try:
-                board = Board.objects.get(name__iexact=board_arg)
-            except Board.DoesNotExist:
-                self.caller.msg("Board not found.")
-                return
-
-        # Board found - Check for post argument
-        if post_arg:
-            self.read_post(board, post_arg)
-        else:
-            self.view_board(board)
-
-    def list_boards(self):
-        "List all boards."
-        boards = Board.objects.all()
-        output = "|b=|n" * 78 + "\n"
-        output += "      |wGroup Name|n".ljust(40)
-        output += "|wLast Post|n".ljust(24)
-        output += "|w# of Messages".ljust(15) + "\n"
-        output += "|b=|n" * 78 + "\n"
-        for board in boards:
-            if board.read_perm == "all" or self.caller.check_permstring(board.read_perm):
-                last_post = board.posts.last()
-                formatted_datetime = "None"
-                if last_post:
-                    formatted_datetime = last_post.created_at.strftime("%Y-%m-%d %H:%M:%S")
-                num_posts = board.posts.count()
-                output += str(board.id).ljust(4)
-                output += board.name[:34].ljust(35)
-                output += formatted_datetime.ljust(22)
-                output += str(num_posts).rjust(13) + "\n"
-        output += "|b=|n" * 78
-        self.caller.msg(output)
-
-    def view_board(self, board):
-        "View specific board."
-        # Format and send board posts
-        posts = board.posts.all()
-        output = format_board_posts_output(self, posts, board)
-        self.caller.msg(output)
-
-    def read_post(self, board, post_arg):
-        "Read specific post."
-        try:
-            post = board.posts.get(id=post_arg)
-        except (Post.DoesNotExist, ValueError):
-            try:
-                post = board.posts.get(title__iexact=post_arg)
-            except Post.DoesNotExist:
-                self.caller.msg("Post not found.")
-                return
-        # Format and send post
-        output = format_post(self, post)
-        self.caller.msg(output)
-
-def format_board_posts_output(self, posts, board):
-    """
-    Helper function to format board posts for display.
-    """
-    output = "|b=|n" * 78 + "\n"
-    output += "|w**** {} ****|n\n".format(board.name).center(78)
-    output += "|wID|n |wTitle|n".ljust(30) + "|wAuthor|n".ljust(20) + "|wDate|n\n"
-    output += "|b-|n" * 78 + "\n"
-    for post in posts:
-        output += "{} | {} | {} | {}\n".format(
-            str(post.id).ljust(5),
-            post.title.ljust(30),
-            str(post.author).ljust(20),
-            post.created_at.strftime("%Y-%m-%d %H:%M")
-        )
-    output += "|b=|n" * 78
-    return output
-
-def format_post(self, post):
-    """
-    Helper function to format a single post for display.
-    """
-    output = "|b=|n" * 78 + "\n"
-    output += "|wTitle: |n{}\n".format(post.title)
-    output += "|wAuthor: |n{}\n".format(post.author)
-    output += "|wDate: |n{}\n".format(post.created_at.strftime("%Y-%m-%d %H:%M"))
-    output += "|b-|n" * 78 + "\n"
-    output += "{}\n".format(post.body)
-    output += "|b=|n" * 78
-    # Display comments if any
-    comments = post.comments.all()
-    if comments:
-        output += "\n|wComments:|n\n"
-        for comment in comments:
-            output += "|w{}|n - {}: {}\n".format(
-                comment.id,
-                comment.author,
-                comment.body
-            )
-    return output
