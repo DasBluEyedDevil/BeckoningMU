@@ -189,9 +189,6 @@ class CmdBBS(default_cmds.MuxCommand):
             self.leave_group(self.args)
         elif 'join' in self.switches:
             self.join_group(self.args)
-        else:
-            self.caller.msg(
-                "Invalid command. Type '+bbs/help' for usage instructions.")
 
     def edit_board(self, board_name, read_perm, write_perm):
 
