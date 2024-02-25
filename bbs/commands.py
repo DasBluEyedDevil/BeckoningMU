@@ -383,9 +383,9 @@ def format_post(self, post):
     """
     output = "|b=|n" * 78 + "\n"
     output += "|wTitle: |n{}\n".format(post.title)
-    output += "|wAuthor: |n{}\n".format(post.author)
-    output += "|wDate: |n{}\n".format(post.created_at.strftime("%Y-%m-%d %H:%M"))
-    output += "|b-|n" * 78 + "\n"
+    output += "|wAuthor: |n{}\n".format(post.author.username)
+    output += "|wDate: |n{}\n".format(post.created_at.strftime("%Y-%m-%d"))
+    output += "|b=|n" * 78 + "\n"
     output += "{}\n".format(post.body)
     output += "|b=|n" * 78
     # Display comments if any
@@ -395,7 +395,7 @@ def format_post(self, post):
         for comment in comments:
             output += "|w{}|n - {}: {}\n".format(
                 comment.id,
-                comment.author,
+                comment.author.username,
                 comment.body
             )
     return output
