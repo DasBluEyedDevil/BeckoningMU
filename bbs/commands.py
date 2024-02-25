@@ -67,12 +67,12 @@ class CmdBBS(default_cmds.MuxCommand):
                 last_post = board.posts.last()
                 formatted_datetime = "None"
                 if last_post:
-                    formatted_datetime = "    " + last_post.created_at.strftime("%Y-%m-%d")
+                    formatted_datetime = last_post.created_at.strftime("%Y-%m-%d")
                 num_posts = board.posts.count()
                 output += str(board.id).ljust(4)
                 output += board.name[:34].ljust(35)
                 output += formatted_datetime.ljust(22)
-                output += str(num_posts).rjust(13) + "\n"
+                output += str(num_posts).rjust(5) + "\n"
         output += "|b=|n" * 78
         self.caller.msg(output)
 
