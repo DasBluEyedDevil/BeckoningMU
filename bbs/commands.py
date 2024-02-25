@@ -360,7 +360,7 @@ class Cmdbbread(MuxCommand):
         "View specific board."
         # Format and send board posts
         posts = board.posts.all()
-        output = self.format_board_posts_output(posts, board)
+        output = format_board_posts_output(posts, board)
         self.caller.msg(output)
 
     def read_post(self, board, post_arg):
