@@ -10,4 +10,4 @@ class CmdSet(CmdSet):
 
     def at_cmdset_creation(self):
         self.add(CmdBBS())
-        self.add(classCmdBbRead())
+        self.add(CmdBBSRead())
