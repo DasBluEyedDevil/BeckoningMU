@@ -278,31 +278,45 @@ class CmdBBS(default_cmds.MuxCommand):
             self.caller.msg("You do not have permission to post to this board.")
 
     def comment(self, post_id, comment_body):
-        "Comment on a post."
-
-        # first we need to break the post_id into board_id and post_id
-        board_id, post_id = post_id.split("/")
+        """
+        Comment on a post.
+        """
+        # Split the post_identifier into board_identifier and post_id
+        try:
+            board_id, post_id = post_id.split("/")
+        except ValueError:
+            self.caller.msg("Usage: comment <board_id or board_name>/<post_id> = <comment_body>")
+            return
+    
+        # Attempt to find the board by ID or name
         try:
             board = Board.objects.get(id=board_id)
-        except ValueError:
-            board = Board.objects.get(name=board_id)
         except Board.DoesNotExist:
-            self.caller.msg("No board by that name or ID exists.")
-            return
-
+            try:
+                board = Board.objects.get(name__iexact=board_id)
+            except Board.DoesNotExist:
+                self.caller.msg("Board not found.")
+                return
+    
+        # Attempt to find the post
         try:
             post = board.posts.get(id=post_id)
         except Post.DoesNotExist:
-            self.caller.msg("No post by that name or ID exists.")
+            self.caller.msg("Post not found.")
             return
-
-        if not self.caller.check_permstring(post.read_perm):
-            self.caller.msg("You do not have permission to read this post.")
+    
+        # Check if the user has permission to read the post (hence comment)
+        if not (post.read_perm == 'all' or self.caller.check_permstring(post.read_perm)):
+            self.caller.msg("You do not have permission to comment on this post.")
             return
-        author = AccountDB.objects.get(id=self.caller.id)
-        Comment.objects.create(
-            author=author, post=post, body=comment_body)
-
+    
+        # Assuming self.caller.account returns the associated AccountDB instance
+        author = self.caller.account
+    
+        # Create the comment
+        Comment.objects.create(author=author, post=post, body=comment_body)
+        self.caller.msg("Comment added successfully.")
+    
         # nofity all connected players who have either posted the post or commented on it.
         for player in AccountDB.objects.get_connected_accounts():
             if player.check_permstring(post.read_perm) and player == author or player in post.comments.values_list('author', flat=True):
