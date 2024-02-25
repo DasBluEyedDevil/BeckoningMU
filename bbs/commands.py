@@ -373,15 +373,15 @@ class CmdBBS(default_cmds.MuxCommand):
             #         return
         
         # Check permission for the post
-        if not post:
-            self.caller.msg("No post by that name or ID exists.")
-            return
-        if board.read_perm == 'all':
-            pass  # Access is granted
+            if not post:
+                self.caller.msg("No post by that name or ID exists.")
+                return
+            if board.read_perm == 'all':
+                pass  # Access is granted
             else:
-        if not self.caller.check_permstring(post.read_perm):
-            self.caller.msg("You do not have permission to read this post.")
-            return
+                if not self.caller.check_permstring(post.read_perm):
+                    self.caller.msg("You do not have permission to read this post.")
+                    return
 
 
         output = ANSIString("|b=|n"*78) + "\n"
