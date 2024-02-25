@@ -1,6 +1,6 @@
 # import default CmdSet
 from evennia.commands.cmdset import CmdSet
-from .commands import CmdBBS, Cmdbbread
+from .commands import CmdBBS
 
 
 class CmdSet(CmdSet):
@@ -10,4 +10,3 @@ class CmdSet(CmdSet):
 
     def at_cmdset_creation(self):
         self.add(CmdBBS())
-        self.add(Cmdbbread())
