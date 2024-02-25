@@ -363,16 +363,16 @@ def format_board_posts_output(self, posts, board):
     """
     output = "|b=|n" * 78 + "\n"
     output += "|w**** {} ****|n\n".format(board.name).center(78)
-    output = "|b=|n" * 78 + "\n"
+    output += "|b=|n" * 78 + "\n"
     output += "|wID|n".ljust(4)
     output += "  |wTitle|n".ljust(35)
     output += "      |wAuthor|n".ljust(22)
     output += "              |wDate Posted".ljust(13) + "\n"
     output += "|b=|n" * 78 + "\n"
     for post in posts:
-        output += str(post.id).ljust(5),
-        output += post.title.ljust(30),
-        output += str(post.author).ljust(20),
+        output += str(post.id).ljust(4),
+        output += post.title.ljust(35),
+        output += str(post.author).ljust(22),
         output += post.created_at.strftime("%Y-%m-%d %H:%M")
         output = "|b=|n" * 78
     return output
