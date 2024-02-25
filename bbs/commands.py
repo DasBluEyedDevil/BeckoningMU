@@ -58,9 +58,9 @@ class CmdBBS(default_cmds.MuxCommand):
         boards = Board.objects.all()
         output = "|b=|n" * 78 + "\n"
         output += "|wID|n".ljust(4)
-        output += " |wBoard Name|n".ljust(35)
-        output += "      |wLast Post|n".ljust(22)
-        output += "            |w# of Messages".ljust(13) + "\n"
+        output += "  |wBoard Name|n".ljust(35)
+        output += "     |wLast Post|n".ljust(22)
+        output += "              |w# of Messages".ljust(13) + "\n"
         output += "|b=|n" * 78 + "\n"
         for board in boards:
             if board.read_perm == "all" or self.caller.check_permstring(board.read_perm):
