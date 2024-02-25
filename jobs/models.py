@@ -57,7 +57,7 @@ class Job(models.Model):
     resolved_at = models.DateTimeField(null=True)
     tags = models.ManyToManyField('Tag')
     players = models.ManyToManyField(
-        AccountDB, null=True, related_name='related_jobs')
+        AccountDB, related_name='related_jobs')
 
 
 class Comment(models.Model):
