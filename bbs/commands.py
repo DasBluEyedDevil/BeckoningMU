@@ -121,70 +121,6 @@ class CmdBBS(default_cmds.MuxCommand):
             self.caller.msg(
                 "Invalid command. Type '+bbs/help' for usage instructions.")
 
-    def list_boards(self):
-        """
-        List all boards that the caller has access to.
-        """
-
-        # ==============================================================================
-        #       Group Name                     Last Post                 # of Messages
-        # ==============================================================================
-        # 1     General                         2019-01-01 12:00                     5
-        # 2 (-) Announcements                   2019-01-01 12:00                    20
-        # 3  *  Staff                           2019-01-01 12:00                     0
-        # ==============================================================================
-        # '*' = restricted     '-' = Read Only     '(-)' - Read Only, but you can write
-        # ==============================================================================
-        "List all boards."
-        boards = Board.objects.all()
-        output = ANSIString("|b=|n"*78) + "\n"
-        output += ANSIString("      |wGroup Name|n").ljust(40)
-        output += ANSIString("|wLast Post|n").ljust(24)
-        output += ANSIString("|w# of Messages").ljust(15) + "\n"
-        output += ANSIString("|b=|n"*78) + "\n"
-        datetime_obj = None
-        for board in boards:
-            if board.read_perm == "all" or self.caller.check_permstring(board.read_perm):
-                last_post = board.posts.last()
-                if last_post:
-                    print(last_post)
-                    datetime_obj = datetime.fromisoformat(
-                        str(last_post.created_at))
-
-                if datetime_obj:
-
-                    formatted_datetime = datetime_obj.strftime(
-                        "%Y-%m-%d %H:%M:%S")
-                else:
-                    formatted_datetime = "None"
-
-                last_post_date = formatted_datetime if last_post else "None"
-                num_posts = board.posts.count()
-
-                output += ANSIString(str(board.id))
-
-                if board.read_perm.lower() not in ["all", "any", "public"]:
-                    self.caller.msg(board.read_perm, board.write_perm)
-                    output += ANSIString("  *  ").ljust(5)
-
-                elif board.write_perm.lower() not in ["all", "any", "public"]:
-                    if board.write_perm == "all" or self.caller.check_permstring(board.write_perm):
-                        output += ANSIString(" (-) ").ljust(5)
-                    else:
-                        output += ANSIString("  -  ").ljust(5)
-                else:
-                    output += ANSIString("    ").ljust(5)
-
-                output += ANSIString(board.name[:34]).ljust(35)
-                output += ANSIString(str(last_post_date)).ljust(22)
-                output += ANSIString(str(num_posts)).rjust(13) + "\n"
-
-        output += ANSIString("|b=|n"*78) + "\n"
-        output += "* = restricted     - = read only      (-) read only but you can write.\n"
-        output += ANSIString("|b=|n"*78) + "\n"
-
-        self.caller.msg(output)
-
     def edit_board(self, board_name, read_perm, write_perm):
 
         # edit requires at least builder.
@@ -249,171 +185,111 @@ class CmdBBS(default_cmds.MuxCommand):
             name=board_name, read_perm=read_perm, write_perm=write_perm)
         self.caller.msg("Created board {}.".format(board_name))
 
-    def view_board(self, board_name):
-        def format_board_posts_output(posts, board):
-            output = ANSIString("|b=|n"*78) + "\n"
-            output += ANSIString(f"**** |w{board.name}|n ****").center(78) + "\n"
-            output += ANSIString("|wMessage|n").ljust(35)
-            output += ANSIString("|wPosted|n").ljust(22)
-            output += ANSIString("|wBy|n").ljust(13)
-            output += ANSIString("|wComments|n").rjust(3) + "\n"
-            output += ANSIString("|b-|n"*78) + "\n"
-    
-            for post in posts:
-                output += ANSIString(str(post.id)).ljust(4)
-                output += ANSIString(post.title[:30]).ljust(35)
-                output += ANSIString(str(post.created_at.strftime("%Y-%m-%d %H:%M"))).ljust(22)
-                output += ANSIString(str(post.author)[:10]).ljust(13)
-                output += ANSIString(str(post.comments.count())).rjust(3) + "\n"
-                
-            output += ANSIString("|b=|n"*78) + "\n"
-            return output
-        "View all posts on a board."
-        # ==============================================================================
-        #                              **** Announcements ****
-        #       Message                            Posted             By    
-        # ------------------------------------------------------------------------------
-        # 1     Welcome to the game!               2019-01-01 12:00   Admin          0
-        # 1.1   `RE: Welcome to the game!`         2019-01-01 12:00   Admin          0
-        # 2     New rules!                         2019-01-01 12:00   Admin          1
-        # 3     Another TItle!                     2019-01-01 12:00   Admin         10
-        # =============================================================================
+from evennia.utils.ansi import ANSIString
+from evennia.utils.utils import class_from_module
+from .models import Board, Post
 
-        # if no board name is given, list all boards.
-        # if no board name is given, list all boards.
-        if not board_name:
+class CmdBBSRead(MuxCommand):
+    """
+    Read boards or posts on the BBS.
+
+    Usage:
+      bbread             - List all boards
+      bbread <board_id>  - View board by id
+      bbread <board_name>- View board by name
+      bbread <board_id>/<post_id>   - Read post by board id and post id
+      bbread <board_name>/<post_id> - Read post by board name and post id
+      bbread <board_name>/<post_name> - Read post by board name and post name
+    """
+    key = "+bbs/read"
+    aliases = ["bbread"]
+    locks = "cmd:all()"
+
+    def func(self):
+        args = self.args.strip()
+
+        # Split arguments
+        try:
+            board_arg, post_arg = args.split("/", 1)
+        except ValueError:
+            board_arg, post_arg = args, None
+
+        # No arguments - List all boards
+        if not board_arg:
             self.list_boards()
             return
-        
+
+        # Board argument present - Attempt to view board or read post
         try:
-            board = Board.objects.get(name=board_name)
-            print("Board read_perm:", board.read_perm)  # This should print 'all'
-        
-            caller_permissions = self.caller.permissions.all() if hasattr(self.caller, 'permissions') else []
-            print("Caller permissions:", caller_permissions)  # This should print a list of permissions
-        
-            if board.read_perm.lower() == "all" or any(perm.lower() == "all" for perm in caller_permissions):
-                # If this is true, then the permission system is likely not the issue
-                pass  # Normal flow continues from here
-            else:
-                self.caller.msg("You do not have permission to view this board.")
-                return  # Exit if the caller does not have permission
-        
-        except Board.DoesNotExist:
-            self.caller.msg("No board by that name exists.")
-            return
-        
-        # Here was the indentation mistake: This if block was incorrectly indented
-        if board.read_perm == 'all':
-            # Access is granted, proceed with displaying the board or post
-            pass
-        else:
-            if not self.caller.check_permstring(board.read_perm):
-                self.caller.msg("You do not have permission to view this board.")
-                return
-        
-        # Proceed with listing the posts on the board as before
-        posts = board.posts.all()
-        output = format_board_posts_output(posts, board)
-        self.caller.msg(output)
-    
-    def read_post(self, args):
-        # ==============================================================================
-        # Title: Welcome to the game!               Board: Announcements (1/2)
-        # Author: Admin                             Posted: 2019-01-01 12:00
-        # Date: 2019-01-01 12:00                    Replies: 2 (Locked)
-        # ------------------------------------------------------------------------------
-        # Welcome to the game! This is a test post.
-        # ==============================================================================
-        "Read a post and its comments."
-        try:
-            board_id, post_id = args.split("/")
-        except ValueError:
-            board_id = args
-            post_id = None
-        
-        if board_id:
+            board = Board.objects.get(id=board_arg)
+        except (Board.DoesNotExist, ValueError):
             try:
-                try:
-                    board = Board.objects.get(id=board_id)
-                except ValueError:
-                    board = Board.objects.get(name=board_id)
+                board = Board.objects.get(name__iexact=board_arg)
             except Board.DoesNotExist:
-                self.caller.msg("No board by that name or ID exists.")
+                self.caller.msg("Board not found.")
                 return
-        
-            # Check permission for the board
-            if board.read_perm == 'all':
-                pass  # Access is granted
-            else:
-                if not self.caller.check_permstring(board.read_perm):
-                    self.caller.msg("You do not have permission to read this board.")
-                    return
-        
-            # Handling post_id presence
-            if post_id:
-                try:
-                    post = board.posts.get(id=post_id)
-                except Post.DoesNotExist:
-                    post = board.posts.get(title=post_id)
-                # If the post doesn't exist, just view the board
-                except Post.DoesNotExist:
-                    self.view_board(board_id)
-                    return
-            else:
-                self.view_board(board_id)
-                return
-        
-            # This block seems to be redundant and incorrectly placed as it repeats the permission check done above
-            # if board.read_perm == 'all':
-            #     pass  # Access is granted
-            # else:
-            #     if not self.caller.check_permstring(board.read_perm):
-            #         self.caller.msg("You do not have permission to read this board.")
-            #         return
-        
-        # Check permission for the post
-            if not post:
-                self.caller.msg("No post by that name or ID exists.")
-                return
-            if board.read_perm == 'all':
-                pass  # Access is granted
-            else:
-                if not self.caller.check_permstring(post.read_perm):
-                    self.caller.msg("You do not have permission to read this post.")
-                    return
 
-
-        output = ANSIString("|b=|n"*78) + "\n"
-        output += ANSIString("|wTitle:|n {}".format(post.title)).ljust(39)
-        output += ANSIString("|wBoard:|n {} ({}/{})".format(board.name,
-                             board_id, post_id)).ljust(39) + "\n"
-        output += ANSIString("|wAuthor:|n {}".format(post.author)).ljust(39)
-        output += ANSIString("|wPosted:|n {}".format(
-            post.created_at.strftime("%Y-%m-%d %H:%M"))).ljust(39) + "\n"
-        output += ANSIString("|wReplies:|n {}".format(
-            post.comments.count())).ljust(39) + "\n"
-        output += ANSIString("|b-|n"*78) + "\n"
-        output += ANSIString(post.body) + "\n"
-
-        comments = post.comments.all()
-
-        if comments:
-            output += ANSIString("|b-|n"*78) + "\n"
-            output += ANSIString("|wReplies:|n") + "\n"
-            output += ANSIString("|b-|n"*78) + "\n"
-            for comment in comments:
-                com = ANSIString("|w{}. {} - {}|n".format(
-                    comment.id, comment.created_at.strftime("%Y-%m-%d %H:%M"), comment.author.name)) + ": "
-                com += ANSIString(comment.body) + "\n"
-                output += com[:78]
+        # Board found - Check for post argument
+        if post_arg:
+            self.read_post(board, post_arg)
         else:
-            output += ANSIString("|b-|n"*78) + "\n"
-            output += ANSIString("|wNo Replies.|n") + "\n"
-        output += "%r" + ANSIString("|b=|n"*78) + "\n"
+            self.view_board(board)
+
+    def list_boards(self):
+        "List all boards."
+        boards = Board.objects.all()
+        output = "|b=|n" * 78 + "\n"
+        output += "      |wGroup Name|n".ljust(40)
+        output += "|wLast Post|n".ljust(24)
+        output += "|w# of Messages".ljust(15) + "\n"
+        output += "|b=|n" * 78 + "\n"
+        for board in boards:
+            if board.read_perm == "all" or self.caller.check_permstring(board.read_perm):
+                last_post = board.posts.last()
+                formatted_datetime = "None"
+                if last_post:
+                    formatted_datetime = last_post.created_at.strftime("%Y-%m-%d %H:%M:%S")
+                num_posts = board.posts.count()
+                output += str(board.id).ljust(4)
+                output += board.name[:34].ljust(35)
+                output += formatted_datetime.ljust(22)
+                output += str(num_posts).rjust(13) + "\n"
+        output += "|b=|n" * 78
         self.caller.msg(output)
 
-    from evennia.accounts.models import AccountDB  # Adjust the import path as necessary
+    def view_board(self, board):
+        "View specific board."
+        # Format and send board posts
+        posts = board.posts.all()
+        output = self.format_board_posts_output(posts, board)
+        self.caller.msg(output)
+
+    def read_post(self, board, post_arg):
+        "Read specific post."
+        try:
+            post = board.posts.get(id=post_arg)
+        except (Post.DoesNotExist, ValueError):
+            try:
+                post = board.posts.get(title__iexact=post_arg)
+            except Post.DoesNotExist:
+                self.caller.msg("Post not found.")
+                return
+        # Format and send post
+        output = self.format_post(post)
+        self.caller.msg(output)
+
+    def format_board_posts_output(self, posts, board):
+        "Helper function to format board posts for display."
+        output = "|b=|n" * 78 + "\n"
+        # Format output for board posts
+        return output
+
+    def format_post(self, post):
+        "Helper function to format a single post for display."
+        output = "|b=|n" * 78 + "\n"
+        # Format output for the post
+        return output
+
 
     def post(self, board_name, post_title, post_body):
         try:
@@ -518,51 +394,103 @@ class CmdBBS(default_cmds.MuxCommand):
         # You would modify self.caller.db.groups here
         pass
 
-
-class classCmdBbRead(MuxCommand):
+class CmdBBSRead(MuxCommand):
     """
-    Read a board, or post from the BBS. A shortcut for +bb.
+    Read boards or posts on the BBS.
 
     Usage:
-      +bbread <board name or ID>
-      +bbread <board name or ID>/<post name or ID>
+      bbread             - List all boards
+      bbread <board_id>  - View board by id
+      bbread <board_name>- View board by name
+      bbread <board_id>/<post_id>   - Read post by board id and post id
+      bbread <board_name>/<post_id> - Read post by board name and post id
+      bbread <board_name>/<post_name> - Read post by board name and post name
     """
-    key = "+bbread"
+    key = "+bbs/read"
     aliases = ["bbread"]
     locks = "cmd:all()"
-    help_category = "BBS"
 
     def func(self):
+        args = self.args.strip()
+
+        # Split arguments
         try:
-            args = self.args.split("/")
-            board_identifier = args[0]
-            post_identifier = None if len(args) < 2 else args[1]
-            comment_identifier = None
+            board_arg, post_arg = args.split("/", 1)
+        except ValueError:
+            board_arg, post_arg = args, None
 
-            # Parsing post and comment identifiers if provided
-            if post_identifier and "." in post_identifier:
-                post_identifier, comment_identifier = post_identifier.split(".")
+        # No arguments - List all boards
+        if not board_arg:
+            self.list_boards()
+            return
 
-            # Using existing logic from CmdBBS class for board and post retrieval
-            cmd_bbs = CmdBBS()
-            cmd_bbs.caller = self.caller
-
-            if not board_identifier:
-                cmd_bbs.list_boards()
+        # Board argument present - Attempt to view board or read post
+        try:
+            board = Board.objects.get(id=board_arg)
+        except (Board.DoesNotExist, ValueError):
+            try:
+                board = Board.objects.get(name__iexact=board_arg)
+            except Board.DoesNotExist:
+                self.caller.msg("Board not found.")
                 return
 
-            # Viewing a specific board's posts
-            if not post_identifier:
-                cmd_bbs.view_board(board_identifier)
+        # Board found - Check for post argument
+        if post_arg:
+            self.read_post(board, post_arg)
+        else:
+            self.view_board(board)
+
+    def list_boards(self):
+        "List all boards."
+        boards = Board.objects.all()
+        output = "|b=|n" * 78 + "\n"
+        output += "      |wGroup Name|n".ljust(40)
+        output += "|wLast Post|n".ljust(24)
+        output += "|w# of Messages".ljust(15) + "\n"
+        output += "|b=|n" * 78 + "\n"
+        for board in boards:
+            if board.read_perm == "all" or self.caller.check_permstring(board.read_perm):
+                last_post = board.posts.last()
+                formatted_datetime = "None"
+                if last_post:
+                    formatted_datetime = last_post.created_at.strftime("%Y-%m-%d %H:%M:%S")
+                num_posts = board.posts.count()
+                output += str(board.id).ljust(4)
+                output += board.name[:34].ljust(35)
+                output += formatted_datetime.ljust(22)
+                output += str(num_posts).rjust(13) + "\n"
+        output += "|b=|n" * 78
+        self.caller.msg(output)
+
+    def view_board(self, board):
+        "View specific board."
+        # Format and send board posts
+        posts = board.posts.all()
+        output = self.format_board_posts_output(posts, board)
+        self.caller.msg(output)
+
+    def read_post(self, board, post_arg):
+        "Read specific post."
+        try:
+            post = board.posts.get(id=post_arg)
+        except (Post.DoesNotExist, ValueError):
+            try:
+                post = board.posts.get(title__iexact=post_arg)
+            except Post.DoesNotExist:
+                self.caller.msg("Post not found.")
                 return
+        # Format and send post
+        output = self.format_post(post)
+        self.caller.msg(output)
 
-            # Reading a specific post (and potentially a comment)
-            read_args = board_identifier if not post_identifier else f"{board_identifier}/{post_identifier}"
-            if comment_identifier:
-                read_args += f".{comment_identifier}"
+    def format_board_posts_output(self, posts, board):
+        "Helper function to format board posts for display."
+        output = "|b=|n" * 78 + "\n"
+        # Format output for board posts
+        return output
 
-            cmd_bbs.read_post(read_args)
-
-        except Exception as e:
-            self.caller.msg(f"An error occurred: {str(e)}")
-
+    def format_post(self, post):
+        "Helper function to format a single post for display."
+        output = "|b=|n" * 78 + "\n"
+        # Format output for the post
+        return output
