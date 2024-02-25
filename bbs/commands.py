@@ -288,7 +288,7 @@ class CmdBBS(default_cmds.MuxCommand):
         # You would modify self.caller.db.groups here
         pass
 
-class CmdBBSRead(MuxCommand):
+class CmdBBRead(MuxCommand):
     """
     Read boards or posts on the BBS.
 
