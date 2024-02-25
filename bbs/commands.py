@@ -57,7 +57,7 @@ class CmdBBS(default_cmds.MuxCommand):
         "List all boards."
         boards = Board.objects.all()
         output = "|b=|n" * 78 + "\n"
-        output += "      |wBoard Name|n".ljust(30)
+        output += "      |wBoard Name|n".ljust(34)
         output += "|wLast Post|n".ljust(20)
         output += "|w# of Messages".ljust(13) + "\n"
         output += "|b=|n" * 78 + "\n"
