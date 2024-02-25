@@ -364,7 +364,7 @@ def format_board_posts_output(self, posts, board):
     output = "|b=|n" * 78 + "\n"
     output += "|w**** {} ****|n\n".format(board.name).center(78)
     output += "|b=|n" * 78 + "\n"
-    output = "|wID|n".ljust(4)
+    output += "|wID|n".ljust(4)
     output += "  |wTitle|n".ljust(35)
     output += "      |wAuthor|n".ljust(22)
     output += "              |wDate Posted".ljust(13) + "\n"
