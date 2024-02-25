@@ -72,7 +72,7 @@ class CmdBBS(default_cmds.MuxCommand):
                 output += str(board.id).ljust(4)
                 output += board.name[:34].ljust(35)
                 output += formatted_datetime.ljust(22)
-                output += str(num_posts).rjust(5) + "\n"
+                output += str(num_posts).rjust(9) + "\n"
         output += "|b=|n" * 78
         self.caller.msg(output)
 
@@ -367,7 +367,7 @@ def format_board_posts_output(self, posts, board):
     output += "|wID|n".ljust(4)
     output += "  |wTitle|n".ljust(35)
     output += "      |wAuthor|n".ljust(22)
-    output += "                  |wDate Posted".ljust(13)
+    output += "          |wDate Posted".ljust(13)
     output += "\n" + "|b=|n" * 78 + "\n"
     for post in posts:
         output += str(post.id).ljust(4)
