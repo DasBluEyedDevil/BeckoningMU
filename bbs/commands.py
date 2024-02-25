@@ -361,7 +361,7 @@ def format_board_posts_output(self, posts, board):
     """
     Helper function to format board posts for display.
     """
-    output = "|b=|n" * 78 + "\n"
+    output += "|b=|n" * 78 + "\n"
     output += "|w**** {} ****|n\n".format(board.name).center(78)
     output += "|b=|n" * 78 + "\n"
     output += "|wID|n".ljust(4)
