@@ -301,7 +301,7 @@ class CmdBBS(default_cmds.MuxCommand):
         try:
             post = board.posts.get(id=post_id)
         except Post.DoesNotExist:
-            self.caller.msg("Post not found.")
+            self.caller.msg("Testing")
             return        
         
         # Check if the user has permission to read the post (hence comment)
