@@ -64,4 +64,45 @@ HELP_ENTRY_DICTS = [
 
         """,
     },
+    {
+        key = "+bbs"
+        aliases = ["+BBS", "bbs", "+bb", "bb", "bbview", "bbread"]
+        lock = "cmd:all()"
+        help_category = "BBS"
+        "text": """
+            This method is designed to handle multiple commands related to an interactive message board functionality. The usage is as follows:
+        
+            Usage:
+                +bbs: List all accessible boards.
+                +bbs: <board>[/title]: View all posts on the specified board. If a title is provided, only posts with id will be displayed.
+                +bbs/boards: List all boards.
+                +bbs/view <board_name>: View all posts on the specified board.
+                +bbs/read <post_id>: Read a specific post and its comments.
+                +bbs/post <board_name> = <post_title>/<post_body>: Post a new message on the specified board.
+                +bbs/comment <post_id> = <comment_body>: Comment on a specific post.
+                +bbs/deletepost <post_id>: Delete a specific post.
+                +bbs/deletecomment <comment_id>: Delete a specific comment.
+                +bbs/createboard <board_name> = <read_perm>/<write_perm>: Create a new board with specified read and write permissions.
+                +bbs/editboard <board_name> = <read_perm>/<write_perm>: Edit the read and write permissions of an existing board.
+                +bbs/deleteboard <board_name>: Delete an existing board.
+                +bbs/read <group_name>: Mark all unread posts in a group as read.
+                +bbs/catchup <group_name>: Mark all posts in a group as read.
+                +bbs/scan: List the number of unread posts in each group.
+                +bbs/post/split <args>: Post a message in multiple parts.
+                +bbs/leave <group_name>: Remove the player from a group.
+                +bbs/join <group_name>: Add the player to a group.
+        
+            If an invalid command is provided, it sends a message to the caller about it.
+        
+            Updated bbread functionality.
+        
+            Usage:
+              bbread             - List all boards
+              bbread <board_id>  - View board by id
+              bbread <board_name>- View board by name
+              bbread <board_id>/<post_id>   - Read post by board id and post id
+              bbread <board_name>/<post_id> - Read post by board name and post id
+              bbread <board_name>/<post_name> - Read post by board name and post name
+            """
+    },
 ]
