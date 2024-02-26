@@ -90,7 +90,7 @@ class CmdBBS(default_cmds.MuxCommand):
             try:
                 post = board.posts.get(title__iexact=post_arg)
             except Post.DoesNotExist:
-                self.caller.msg("Post not found.")
+                self.caller.msg("TESTING.")
                 return
         # Format and send post
         output = format_post(self, post)
