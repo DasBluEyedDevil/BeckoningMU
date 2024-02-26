@@ -39,7 +39,7 @@ class CmdBBS(default_cmds.MuxCommand):
     key = "+bbs"
     aliases = ["+BBS", "bbs", "+bb", "bb", "bbview", "bbread"]
     lock = "cmd:all()"
-    help_category = "BB Boards"
+    help_category = "Boards"
 
     """
     Read boards or posts on the BBS.
