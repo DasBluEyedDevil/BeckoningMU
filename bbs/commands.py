@@ -1,7 +1,6 @@
 from evennia import default_cmds
 from evennia.utils import list_to_string
 from evennia.utils.ansi import ANSIString
-from django.contrib.auth.models import User
 # update this import to match your project structure
 from .models import Board, Post, Comment
 # get the AccountDB class from the engine
