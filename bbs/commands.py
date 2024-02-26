@@ -1,7 +1,7 @@
 from evennia import default_cmds
 from evennia.utils import list_to_string
 from evennia.utils.ansi import ANSIString
-
+from django.contrib.auth.models import User
 # update this import to match your project structure
 from .models import Board, Post, Comment
 # get the AccountDB class from the engine
@@ -287,7 +287,7 @@ class CmdBBS(default_cmds.MuxCommand):
         except ValueError:
             self.caller.msg("Usage: comment <board_id or board_name>/<post_id> = <comment_body>")
             return
-    
+        
         # Attempt to find the board by ID or name
         try:
             board = Board.objects.get(id=board_id)
@@ -297,28 +297,28 @@ class CmdBBS(default_cmds.MuxCommand):
             except Board.DoesNotExist:
                 self.caller.msg("Board not found.")
                 return
-    
+        
         # Attempt to find the post
         try:
-            post = Board.posts.get(id=post_id)
+            post = board.posts.get(id=post_id)
         except Post.DoesNotExist:
             self.caller.msg("Post not found.")
             return        
-    
+        
         # Check if the user has permission to read the post (hence comment)
         if not (post.read_perm == 'all' or self.caller.check_permstring(post.read_perm)):
             self.caller.msg("You do not have permission to comment on this post.")
             return
-    
+        
         # Assuming self.caller.account returns the associated AccountDB instance
         author = self.caller.account
-    
+        
         # Create the comment
         Comment.objects.create(author=author, post=post, body=comment_body)
         self.caller.msg("Comment added successfully.")
-    
+        
         # nofity all connected players who have either posted the post or commented on it.
-        for player in AccountDB.objects.get_connected_accounts():
+        for player in User.objects.get_connected_accounts():
             if player.check_permstring(post.read_perm) and player == author or player in post.comments.values_list('author', flat=True):
                 player.msg(
                     "New comment on post {}/{} by |c{}|n.".format(board.id, post.id, author.name))
