@@ -317,7 +317,7 @@ class CmdBBS(default_cmds.MuxCommand):
         self.caller.msg("Comment added successfully.")
         
         # nofity all connected players who have either posted the post or commented on it.
-        for player in User.objects.get_connected_accounts():
+        for player in AccountDB.objects.get_connected_accounts():
             if player.check_permstring(post.read_perm) and player == author or player in post.comments.values_list('author', flat=True):
                 player.msg(
                     "New comment on post {}/{} by |c{}|n.".format(board.id, post.id, author.name))
