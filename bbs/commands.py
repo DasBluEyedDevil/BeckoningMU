@@ -374,20 +374,21 @@ def format_board_posts_output(self, posts, board):
     Helper function to format board posts for display.
     """
     output = "|b=|n" * 78 + "\n"
-    output += "|w**** {} ****|n".format(board.name).center(78)
-    output += "\n" + "|b=|n" * 78 + "\n"
+    output += "|w**** {} ****|n".format(board.name).center(78) + "\n"
+    output += "|b=|n" * 78 + "\n"
     output += "|wID|n".ljust(4)
     output += "  |wTitle|n".ljust(35)
     output += "      |wAuthor|n".ljust(22)
-    output += "          |wDate Posted".ljust(13)
-    output += "\n" + "|b=|n" * 78 + "\n"
+    output += "          |wDate Posted".ljust(13) + "\n"
+    output += "|b=|n" * 78 + "\n"
     for post in posts:
         output += str(post.id).ljust(4)
         output += post.title.ljust(35)
         output += str(post.author.username).ljust(22)
         output += post.created_at.strftime("%Y-%m-%d")
-        output += "\n" + "|b=|n" * 78
+        output += "\n" + "|b=|n" * 78 + "\n"
     return output
+
     
 def format_post(self, post):
     """
