@@ -390,12 +390,12 @@ def format_board_posts_output(self, posts, board):
         output += "\n" + "|b=|n" * 78
     return output
     
-def format_post(self, post, board):
+def format_post(self, post):
     """
-    Helper function to format a single post for display, including the board name.
+    Helper function to format a single post for display.
     """
     output = "|b=|n" * 78 + "\n"
-    output += "|w**** {} ****|n".format(board.name).center(78) + "\n"
+    output += "|wPost Details|n".center(78) + "\n"
     output += "|b=|n" * 78 + "\n"
     output += "|wTitle: |n{}\n".format(post.title)
     output += "|wAuthor: |n{}\n".format(post.author.username)
@@ -414,3 +414,4 @@ def format_post(self, post, board):
                 comment.body
             )
     return output
+
