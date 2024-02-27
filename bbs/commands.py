@@ -82,43 +82,31 @@ class CmdBBS(default_cmds.MuxCommand):
         output = format_board_posts_output(self, posts, board)
         self.caller.msg(output)
 
-    def read_post(self, board, post_arg):
+    def read_post(self, board_identifier, post_arg):
         """
-        Attempts to find and display a post based on a board name or ID and a post ID.
-        Input is in the format 'board_identifier/post_id'.
+        Attempts to find and display a post based on a board identifier (name or ID) and a post ID.
         """
         try:
-            # Split the input to get board identifier and post ID
-            board_identifier, post_id_str = input_str.split('/')
-            post_id = int(post_id_str)  # Convert post_id to int for lookup
-            
-            # Try to find the board by name or ID
-            try:
-                if board_identifier.isdigit():
-                    # If board_identifier is all digits, treat it as an ID
-                    board = Board.objects.get(id=int(board_identifier))
-                else:
-                    # Otherwise, treat it as a board name
-                    board = Board.objects.get(name__iexact=board_identifier)
-            except Board.DoesNotExist:
-                self.caller.msg("Board not found.")
-                return
-            
-            # Now, try to find the post by ID within the found board
-            try:
-                post = board.posts.get(id=post_id)
-                # If found, format and send post details to the caller
-                output = self.format_post(post)  # Assuming you have a method to format the post
-                self.caller.msg(output)
-            except Post.DoesNotExist:
-                self.caller.msg("Post not found within the specified board.")
-            
-        except ValueError:
-            # If the input does not match the expected format or conversion to int fails
-            self.caller.msg("Invalid input format. Use 'bbread board_name_or_id/post_id'.")
-        except Post.DoesNotExist:
-            # Catch-all for Post.DoesNotExist, if not caught by the specific try-except block
+            # Attempt to find the board by ID or name
+            if str(board_identifier).isdigit():
+                board = Board.objects.get(id=int(board_identifier))
+            else:
+                board = Board.objects.get(name__iexact=board_identifier)
+        except Board.DoesNotExist:
+            self.caller.msg("Board not found.")
+            return
+    
+        # Now proceed with your existing logic to find and display the post
+        # For example, using the logic previously discussed:
+        try:
+            post_id = int(post_arg)  # Assuming post_arg is the post ID as a string
+            post = board.posts.get(id=post_id)
+            # Format and send post details to the caller
+            output = self.format_post(post)  # You need to implement this method
+            self.caller.msg(output)
+        except (ValueError, Post.DoesNotExist):
             self.caller.msg("Post not found.")
+
 
     """
     def read_post(self, board, post_arg):
