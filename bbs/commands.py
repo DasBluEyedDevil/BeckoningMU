@@ -81,11 +81,11 @@ class CmdBBS(default_cmds.MuxCommand):
         posts = board.posts.all()
         output = format_board_posts_output(self, posts, board)
         self.caller.msg(output)
-
+"""
     def read_post(self, board_identifier, post_arg):
-        """
-        Attempts to find and display a post based on a board identifier (name or ID) and a post ID.
-        """
+        
+        #Attempts to find and display a post based on a board identifier (name or ID) and a post ID.
+        
         try:
             # Attempt to find the board by ID or name
             if str(board_identifier).isdigit():
@@ -106,9 +106,9 @@ class CmdBBS(default_cmds.MuxCommand):
             self.caller.msg(output)
         except (ValueError, Post.DoesNotExist):
             self.caller.msg("Post not found.")
+"""
 
-
-    """
+    
     def read_post(self, board, post_arg):
         "Read specific post."
         try:
@@ -117,12 +117,12 @@ class CmdBBS(default_cmds.MuxCommand):
             try:
                 post = board.posts.get(title__iexact=post_arg)
             except Post.DoesNotExist:
-                self.caller.msg("TESTING.")
+                self.caller.msg("Post not found.")
                 return
         # Format and send post
         output = format_post(self, post)
         self.caller.msg(output)
-"""
+
     def get_name(self, name):
         try:
             try:
