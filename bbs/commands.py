@@ -82,46 +82,6 @@ class CmdBBS(default_cmds.MuxCommand):
         output = format_board_posts_output(self, posts, board)
         self.caller.msg(output)
     
-    def read_post(self, input_str):
-        """
-        Read a specific post based on board identifier and post ID.
-        """
-        # Split the input_str into board_identifier and post_id
-        try:
-            board_identifier, post_id_str = input_str.split("/")
-            post_id = int(post_id_str)  # Convert post_id to int for lookup
-        except ValueError:
-            self.caller.msg("Usage: read <board_id or board_name>/<post_id>")
-            return
-    
-        # Attempt to find the board by ID or name
-        try:
-            if board_identifier.isdigit():
-                board = Board.objects.get(id=int(board_identifier))
-            else:
-                board = Board.objects.get(name__iexact=board_identifier)
-        except Board.DoesNotExist:
-            self.caller.msg("Board not found.")
-            return
-    
-        # Attempt to find the post within the found board
-        try:
-            post = board.posts.get(id=post_id)
-        except Post.DoesNotExist:
-            self.caller.msg("Post not found.")
-            return
-    
-        # Check if the user has permission to read the post
-        if not (post.read_perm == 'all' or self.caller.check_permstring(post.read_perm)):
-            self.caller.msg("You do not have permission to read this post.")
-            return
-    
-        # Format and send the post details to the caller
-        # Assuming there is a method to format the post details for display
-        output = self.format_post(post)
-        self.caller.msg(output)
-
-    """
     def read_post(self, board, post_arg):
         "Read specific post."
         try:
@@ -135,7 +95,7 @@ class CmdBBS(default_cmds.MuxCommand):
         # Format and send post
         output = format_post(self, post)
         self.caller.msg(output)
-    """
+    
     def get_name(self, name):
         try:
             try:
