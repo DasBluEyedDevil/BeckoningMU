@@ -82,6 +82,45 @@ class CmdBBS(default_cmds.MuxCommand):
         output = format_board_posts_output(self, posts, board)
         self.caller.msg(output)
 
+    def read_post(self, input_str):
+        """
+        Attempts to find and display a post based on a board name or ID and a post ID.
+        Input is in the format 'board_identifier/post_id'.
+        """
+        try:
+            # Split the input to get board identifier and post ID
+            board_identifier, post_id_str = input_str.split('/')
+            post_id = int(post_id_str)  # Convert post_id to int for lookup
+            
+            # Try to find the board by name or ID
+            try:
+                if board_identifier.isdigit():
+                    # If board_identifier is all digits, treat it as an ID
+                    board = Board.objects.get(id=int(board_identifier))
+                else:
+                    # Otherwise, treat it as a board name
+                    board = Board.objects.get(name__iexact=board_identifier)
+            except Board.DoesNotExist:
+                self.caller.msg("Board not found.")
+                return
+            
+            # Now, try to find the post by ID within the found board
+            try:
+                post = board.posts.get(id=post_id)
+                # If found, format and send post details to the caller
+                output = self.format_post(post)  # Assuming you have a method to format the post
+                self.caller.msg(output)
+            except Post.DoesNotExist:
+                self.caller.msg("Post not found within the specified board.")
+            
+        except ValueError:
+            # If the input does not match the expected format or conversion to int fails
+            self.caller.msg("Invalid input format. Use 'bbread board_name_or_id/post_id'.")
+        except Post.DoesNotExist:
+            # Catch-all for Post.DoesNotExist, if not caught by the specific try-except block
+            self.caller.msg("Post not found.")
+
+    """
     def read_post(self, board, post_arg):
         "Read specific post."
         try:
@@ -95,7 +134,7 @@ class CmdBBS(default_cmds.MuxCommand):
         # Format and send post
         output = format_post(self, post)
         self.caller.msg(output)
-
+"""
     def get_name(self, name):
         try:
             try:
