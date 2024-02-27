@@ -390,7 +390,7 @@ def format_board_posts_output(self, posts, board):
         output += "\n" + "|b=|n" * 78
     return output
     
-def format_post(self, post):
+def format_post(self, post, board):
     """
     Helper function to format a single post for display.
     """
