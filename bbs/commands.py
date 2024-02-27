@@ -81,7 +81,7 @@ class CmdBBS(default_cmds.MuxCommand):
         posts = board.posts.all()
         output = format_board_posts_output(self, posts, board)
         self.caller.msg(output)
-"""
+    """
     def read_post(self, board_identifier, post_arg):
         
         #Attempts to find and display a post based on a board identifier (name or ID) and a post ID.
@@ -106,9 +106,7 @@ class CmdBBS(default_cmds.MuxCommand):
             self.caller.msg(output)
         except (ValueError, Post.DoesNotExist):
             self.caller.msg("Post not found.")
-"""
-
-    
+    """
     def read_post(self, board, post_arg):
         "Read specific post."
         try:
