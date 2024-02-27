@@ -115,48 +115,27 @@ class CmdBBS(default_cmds.MuxCommand):
 
     def func(self):
         args = self.args.strip()
-
+    
         # Split arguments
         try:
             board_arg, post_arg = args.split("/", 1)
         except ValueError:
             board_arg, post_arg = args, None
-
-        # No arguments - List all boards
-        if not board_arg:
-            self.list_boards()
-            return
-
-        # Board argument present - Attempt to view board or read post
-        try:
-            board = Board.objects.get(id=board_arg)
-        except (Board.DoesNotExist, ValueError):
-            try:
-                board = Board.objects.get(name__iexact=board_arg)
-            except Board.DoesNotExist:
-                self.caller.msg("Board not found.")
-                return
-
-        # Board found - Check for post argument
-        if post_arg:
-            self.read_post(board, post_arg)
-        else:
-            self.view_board(board)
-
+    
         # Handle different commands
         if "boards" in self.switches:
             self.list_boards()
         elif "view" in self.switches:
-            self.view_board(self.args)
+            self.view_board(board_arg)
         elif "read" in self.switches:
-            self.read_post(self.args)
+            self.read_post(board_arg, post_arg)
         elif "post" in self.switches:
             board_name, post_content = self.args.split("=")
             post_title, post_body = post_content.split("/")
-            self.post(board_name, post_title, post_body)
+            self.post(board_name.strip(), post_title.strip(), post_body.strip())
         elif "comment" in self.switches:
             post_id, comment_body = self.args.split("=")
-            self.comment(post_id, comment_body)
+            self.comment(post_id.strip(), comment_body.strip())
         elif "deletepost" in self.switches:
             self.delete_post(self.args)
         elif "deletecomment" in self.switches:
@@ -169,12 +148,12 @@ class CmdBBS(default_cmds.MuxCommand):
                 board_name = self.args
                 read_perm = "all"
                 write_perm = "all"
-
-            self.create_board(board_name, read_perm, write_perm)
+    
+            self.create_board(board_name.strip(), read_perm.strip(), write_perm.strip())
         elif "editboard" in self.switches:
             board_name, perms = self.args.split("=")
             read_perm, write_perm = perms.split("/")
-            self.edit_board(board_name, read_perm, write_perm)
+            self.edit_board(board_name.strip(), read_perm.strip(), write_perm.strip())
         elif "deleteboard" in self.switches:
             self.delete_board(self.args)
         elif 'read' in self.switches:
@@ -189,6 +168,26 @@ class CmdBBS(default_cmds.MuxCommand):
             self.leave_group(self.args)
         elif 'join' in self.switches:
             self.join_group(self.args)
+        else:
+            # No switches or unrecognized switch - List all boards or view board
+            if not board_arg:
+                self.list_boards()
+            else:
+                # Board argument present - Attempt to view board or read post
+                try:
+                    board = Board.objects.get(id=board_arg)
+                except (Board.DoesNotExist, ValueError):
+                    try:
+                        board = Board.objects.get(name__iexact=board_arg)
+                    except Board.DoesNotExist:
+                        self.caller.msg("Board not found.")
+                        return
+    
+                # Board found - Check for post argument
+                if post_arg:
+                    self.read_post(board, post_arg)
+                else:
+                    self.view_board(board)
 
     def edit_board(self, board_name, read_perm, write_perm):
 
