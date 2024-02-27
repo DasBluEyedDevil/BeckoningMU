@@ -395,6 +395,8 @@ def format_post(self, post):
     Helper function to format a single post for display.
     """
     output = "|b=|n" * 78 + "\n"
+    output += "|w**** {} ****|n".format(board.name).center(78)
+    output = "|b=|n" * 78 + "\n"
     output += "|wTitle: |n{}\n".format(post.title)
     output += "|wAuthor: |n{}\n".format(post.author.username)
     output += "|wDate: |n{}\n".format(post.created_at.strftime("%Y-%m-%d"))
