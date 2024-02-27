@@ -82,7 +82,7 @@ class CmdBBS(default_cmds.MuxCommand):
         output = format_board_posts_output(self, posts, board)
         self.caller.msg(output)
 
-    def read_post(self, input_str):
+    def read_post(self, board, post_arg):
         """
         Attempts to find and display a post based on a board name or ID and a post ID.
         Input is in the format 'board_identifier/post_id'.
