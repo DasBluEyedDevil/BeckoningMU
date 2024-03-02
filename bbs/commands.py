@@ -57,8 +57,8 @@ class CmdBBS(default_cmds.MuxCommand):
         boards = Board.objects.all()
         output = "|b=|n" * 78 + "\n"
         output += "  |wBoard Name|n".ljust(39)
-        output += "    |wLast Post|n".ljust(22)  # Header remains unchanged
-        output += "           |w# of Messages".ljust(13) + "\n"
+        output += "|wLast Post|n".ljust(24)  # Note the removal of spaces before "Last Post"
+        output += "|w# of Messages|n".ljust(15) + "\n"  # Adjusted for clarity
         output += "|b=|n" * 78 + "\n"
         for board in boards:
             if board.read_perm == "all" or self.caller.check_permstring(board.read_perm):
@@ -67,13 +67,12 @@ class CmdBBS(default_cmds.MuxCommand):
                 if last_post:
                     formatted_datetime = last_post.created_at.strftime("%Y-%m-%d")
                 num_posts = board.posts.count()
-                output += "  " + board.name[:34].ljust(39)
-                # Adjust the left justification directly on the formatted date string
-                output += formatted_datetime.rjust(20)  # Use rjust to move the date to the left within its field
-                output += str(num_posts).rjust(9) + "\n"
+                output += "  " + board.name[:34].ljust(37)  # Adjusting to keep the board name aligned
+                # Directly align the 'Last Post' date under its header
+                output += formatted_datetime.ljust(24)  # Adjusted space to align directly under "Last Post"
+                output += str(num_posts).rjust(13) + "\n"  # Adjusted for alignment
         output += "|b=|n" * 78
         self.caller.msg(output)
-
 
     def view_board(self, board):
         "View specific board."
