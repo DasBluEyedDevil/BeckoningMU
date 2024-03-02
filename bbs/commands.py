@@ -57,8 +57,8 @@ class CmdBBS(default_cmds.MuxCommand):
         boards = Board.objects.all()
         output = "|b=|n" * 78 + "\n"
         output += "  |wBoard Name|n".ljust(29)  # Adjusted spacing for new column
-        output += "|wGroup|n".ljust(10)  # New column for read permissions
-        output += "      |wLast Post|n".ljust(22)
+        output += " |wGroup|n".ljust(10)  # New column for read permissions
+        output += "         |wLast Post|n".ljust(22)
         output += "           |w# of Messages".ljust(13) + "\n"
         output += "|b=|n" * 78 + "\n"
         for board in boards:
