@@ -508,7 +508,6 @@ class CmdMyJobs(MuxCommand):
     def view_my_job(self):
         try:
             job_id = self.args.strip()
-            # Ensure we are querying within the jobs accessible by this account
             account = self.caller.account if hasattr(self.caller, 'account') else None
             if not account:
                 self.caller.msg("This command can only be used by a character with a valid account.")
@@ -519,22 +518,34 @@ class CmdMyJobs(MuxCommand):
             self.caller.msg("Job not found.")
             return
     
-        # Start building the output with job details
-        output = ANSIString("|R=|n" * 39) + "\n"
-        output += ANSIString(f"|wJob {job.id}|n: {job.title}\nDescription: {job.description}\nStatus: |w{job.status}|n").center(78, " ") + "\n"
-        output += ANSIString("|R=|n" * 39) + "\n"
+        # Frame start
+        output = ANSIString("=" * 78) + "\n"
+        output += ANSIString(f"|wJob #{job.id}|n").center(78, "=") + "\n"
+        output += "=" * 78 + "\n"
     
-        # Fetching and displaying public comments
+        # Ticket Name and Status
+        output += f"|w{'Ticket Name':<37}|{'Status':>38}|n\n"
+        output += "-" * 78 + "\n"
+        output += f"{job.title:<37}|{job.status:>38}\n"
+        output += "-" * 78 + "\n"
+    
+        # Description
+        output += f"|wDescription:|n\n{job.description}\n"
+        output += "-" * 78 + "\n"
+    
+        # Comments
         public_comments = job.comments.filter(public=True)
         if public_comments:
-            output += "\n" + ANSIString("|wPublic Comments:|n").center(78, " ") + "\n"
-            output += ANSIString("|R=|n" * 39) + "\n"
+            output += "|wComments:|n\n"
             for comment in public_comments:
-                comment_output = f" - {comment.author.get_display_name(self.caller)}: {comment.content}\n"
-                output += ANSIString(comment_output).ljust(78) + "\n"
-            output += ANSIString("|R=|n" * 39) + "\n"
+                output += f"- {comment.author.get_display_name(self.caller)}: {comment.content}\n"
+            output += "=" * 78 + "\n"
+        else:
+            output += "|wNo public comments.|n\n"
+            output += "=" * 78 + "\n"
     
         self.caller.msg(output)
+
 
 
 
