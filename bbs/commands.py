@@ -85,12 +85,15 @@ class CmdBBS(default_cmds.MuxCommand):
     def read_post(self, board, post_arg):
         "Read specific post."
         try:
-            post = board.posts.get(id=post_arg)
-        except (Post.DoesNotExist, ValueError):
+            # Attempt to interpret post_arg as a sequence number first
+            sequence_number = int(post_arg)  # Convert post_arg to an integer
+            post = board.posts.get(sequence_number=sequence_number)
+        except (ValueError, Post.DoesNotExist):
+            # If conversion to int fails or no post with such sequence_number, try title
             try:
                 post = board.posts.get(title__iexact=post_arg)
             except Post.DoesNotExist:
-                self.caller.msg("Post not found.")
+                self.caller.msg("Post not found by sequence number or title.")
                 return
         # Format and send post
         output = format_post(self, post)
@@ -371,24 +374,23 @@ class CmdBBS(default_cmds.MuxCommand):
         pass
 def format_board_posts_output(self, posts, board):
     """
-    Helper function to format board posts for display.
+    Helper function to format board posts for display, using sequence_number.
     """
     output = "|b=|n" * 78 + "\n"
     output += "|w**** {} ****|n".format(board.name).center(78) + "\n"
     output += "|b=|n" * 78 + "\n"
-    output += "|wID|n".ljust(4)
+    output += "|wSeq|n".ljust(4)  # Changed from ID to Seq for sequence number
     output += "  |wTitle|n".ljust(35)
     output += "      |wAuthor|n".ljust(22)
     output += "          |wDate Posted".ljust(13) + "\n"
     output += "|b=|n" * 78 + "\n"
-    for post in posts:
-        output += str(post.id).ljust(4)
+    for post in posts.order_by('sequence_number'):  # Ensure posts are ordered by sequence_number
+        output += str(post.sequence_number).ljust(4)  # Use sequence_number
         output += post.title.ljust(35)
         output += str(post.author.username).ljust(22)
         output += post.created_at.strftime("%Y-%m-%d")
         output += "\n" + "|b=|n" * 78 + "\n"
     return output
-
     
 def format_post(self, post):
     """
