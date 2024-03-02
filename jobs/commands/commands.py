@@ -514,6 +514,9 @@ class CmdMyJobs(MuxCommand):
         self.caller.msg(output)
 
     def list_my_jobs(self):
+        if not isinstance(self.caller, AccountDB):
+            self.caller.msg("This command can only be used by authenticated accounts.")
+            return
         jobs = self.jobs.all()
         if jobs:
             output = "|wYour Jobs|n\n"
