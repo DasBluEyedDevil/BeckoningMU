@@ -56,8 +56,7 @@ class CmdBBS(default_cmds.MuxCommand):
         "List all boards."
         boards = Board.objects.all()
         output = "|b=|n" * 78 + "\n"
-        output += "|wID|n".ljust(4)
-        output += "  |wBoard Name|n".ljust(35)
+        output += "  |wBoard Name|n".ljust(39)
         output += "      |wLast Post|n".ljust(22)
         output += "           |w# of Messages".ljust(13) + "\n"
         output += "|b=|n" * 78 + "\n"
@@ -68,8 +67,7 @@ class CmdBBS(default_cmds.MuxCommand):
                 if last_post:
                     formatted_datetime = last_post.created_at.strftime("%Y-%m-%d")
                 num_posts = board.posts.count()
-                output += str(board.id).ljust(4)
-                output += board.name[:34].ljust(35)
+                output += "  " + board.name[:34].ljust(39)
                 output += formatted_datetime.ljust(22)
                 output += str(num_posts).rjust(9) + "\n"
         output += "|b=|n" * 78
@@ -85,12 +83,15 @@ class CmdBBS(default_cmds.MuxCommand):
     def read_post(self, board, post_arg):
         "Read specific post."
         try:
-            post = board.posts.get(id=post_arg)
-        except (Post.DoesNotExist, ValueError):
+            # Attempt to interpret post_arg as a sequence number first
+            sequence_number = int(post_arg)  # Convert post_arg to an integer
+            post = board.posts.get(sequence_number=sequence_number)
+        except (ValueError, Post.DoesNotExist):
+            # If conversion to int fails or no post with such sequence_number, try title
             try:
                 post = board.posts.get(title__iexact=post_arg)
             except Post.DoesNotExist:
-                self.caller.msg("Post not found.")
+                self.caller.msg("Post not found by sequence number or title.")
                 return
         # Format and send post
         output = format_post(self, post)
@@ -156,18 +157,6 @@ class CmdBBS(default_cmds.MuxCommand):
             self.edit_board(board_name.strip(), read_perm.strip(), write_perm.strip())
         elif "deleteboard" in self.switches:
             self.delete_board(self.args)
-        elif 'read' in self.switches:
-            self.read_all_unread(self.args)
-        elif 'catchup' in self.switches:
-            self.mark_all_as_read(self.args)
-        elif 'scan' in self.switches:
-            self.scan_for_unread()
-        elif 'post/split' in self.switches:
-            self.split_post(self.args)
-        elif 'leave' in self.switches:
-            self.leave_group(self.args)
-        elif 'join' in self.switches:
-            self.join_group(self.args)
         else:
             # No switches or unrecognized switch - List all boards or view board
             if not board_arg:
@@ -275,33 +264,30 @@ class CmdBBS(default_cmds.MuxCommand):
             print("User does not have permission to post.")
             self.caller.msg("You do not have permission to post to this board.")
 
-    def comment(self, post_id, comment_body):
+    def comment(self, board_name_and_post_sequence, comment_body):
         """
-        Comment on a post.
+        Comment on a post using the board name and post sequence number.
         """
-        # Split the post_identifier into board_identifier and post_id
+        # Split the input into board_name and post_sequence
         try:
-            board_id, post_id = post_id.split("/")
+            board_name, post_sequence = board_name_and_post_sequence.split("/")
         except ValueError:
-            self.caller.msg("Usage: comment <board_id or board_name>/<post_id> = <comment_body>")
+            self.caller.msg("Usage: comment <board_name>/<post_sequence> = <comment_body>")
             return
         
-        # Attempt to find the board by ID or name
+        # Attempt to find the board by name
         try:
-            board = Board.objects.get(id=board_id)
+            board = Board.objects.get(name__iexact=board_name)
         except Board.DoesNotExist:
-            try:
-                board = Board.objects.get(name__iexact=board_id)
-            except Board.DoesNotExist:
-                self.caller.msg("Board not found.")
-                return
+            self.caller.msg("Board not found.")
+            return
         
-        # Attempt to find the post
+        # Attempt to find the post by sequence number within the board
         try:
-            post = board.posts.get(id=post_id)
+            post = board.posts.get(sequence_number=post_sequence)
         except Post.DoesNotExist:
             self.caller.msg("Post not found.")
-            return        
+            return
         
         # Check if the user has permission to read the post (hence comment)
         if not (post.read_perm == 'all' or self.caller.check_permstring(post.read_perm)):
@@ -315,80 +301,72 @@ class CmdBBS(default_cmds.MuxCommand):
         Comment.objects.create(author=author, post=post, body=comment_body)
         self.caller.msg("Comment added successfully.")
         
-        # nofity all connected players who have either posted the post or commented on it.
+        # Notify all connected players who have either posted the post or commented on it.
         for player in AccountDB.objects.get_connected_accounts():
-            if player.check_permstring(post.read_perm) and player == author or player in post.comments.values_list('author', flat=True):
-                player.msg(
-                    "New comment on post {}/{} by |c{}|n.".format(board.id, post.id, author.name))
+            if player.check_permstring(post.read_perm) and (player == author or player in post.comments.values_list('author', flat=True)):
+                player.msg("New comment on post {}/{} by |c{}|n.".format(board.name, post.sequence_number, author.username))
 
-    def delete_post(self, post_id):
-        "Delete a post."
-        post = Post.objects.get(id=post_id)
+
+    def delete_post(self, identifier):
+        """
+        Delete a post using board name and post sequence number.
+        """
+        try:
+            board_name, post_sequence = identifier.split("/")
+            board = Board.objects.get(name__iexact=board_name)
+            post = board.posts.get(sequence_number=post_sequence)
+        except (ValueError, Board.DoesNotExist, Post.DoesNotExist):
+            self.caller.msg("Usage: delete_post <board_name>/<post_sequence>")
+            return
+    
         if not self.caller == post.author:
             self.caller.msg("You do not have permission to delete this post.")
             return
+    
         post.delete()
-        self.caller.msg("Deleted post {}.".format(post_id))
+        self.caller.msg(f"Deleted post {post_sequence} from board '{board_name}'.")
 
-    def delete_comment(self, comment_id):
-        "Delete a comment."
-        comment = Comment.objects.get(id=comment_id)
-        if not self.caller == comment.author:
-            self.caller.msg(
-                "You do not have permission to delete this comment.")
+
+    def delete_comment(self, post_identifier, comment_id):
+        """
+        Delete a comment from a post, specified by board name and post sequence number.
+        """
+        try:
+            board_name, post_sequence = post_identifier.split("/")
+            board = Board.objects.get(name__iexact=board_name)
+            post = board.posts.get(sequence_number=post_sequence)
+            comment = post.comments.get(id=comment_id)  # Assuming comment ID is still used for direct identification
+        except (ValueError, Board.DoesNotExist, Post.DoesNotExist, Comment.DoesNotExist):
+            self.caller.msg("Usage: delete_comment <board_name>/<post_sequence> <comment_id>")
             return
+    
+        if not self.caller == comment.author:
+            self.caller.msg("You do not have permission to delete this comment.")
+            return
+    
         comment.delete()
-        self.caller.msg("Deleted comment {}.".format(comment_id))
+        self.caller.msg(f"Deleted comment {comment_id} from post '{post_sequence}' on board '{board_name}'.")
 
-    def read_all_unread(self, group_name):
-        # Code to mark all unread posts in a group as read
-        # You would modify self.caller.db.read_posts here
-        pass
 
-    def mark_all_as_read(self, group_name):
-        # Code to mark all posts in a group as read
-        # You would modify self.caller.db.read_posts here
-        pass
-
-    def scan_for_unread(self):
-        # Code to list the number of unread posts in each group
-        # You would read from self.caller.db.read_posts here
-        pass
-
-    def split_post(self, args):
-        # Code to post a message in multiple parts
-        # This might not require modifying self.caller.db
-        pass
-
-    def leave_group(self, group_name):
-        # Code to remove the player from a group
-        # You would modify self.caller.db.groups here
-        pass
-
-    def join_group(self, group_name):
-        # Code to add the player to a group
-        # You would modify self.caller.db.groups here
-        pass
 def format_board_posts_output(self, posts, board):
     """
-    Helper function to format board posts for display.
+    Helper function to format board posts for display, using sequence_number.
     """
     output = "|b=|n" * 78 + "\n"
     output += "|w**** {} ****|n".format(board.name).center(78) + "\n"
     output += "|b=|n" * 78 + "\n"
-    output += "|wID|n".ljust(4)
+    output += "|wID|n".ljust(4)  # Changed from ID to Seq for sequence number
     output += "  |wTitle|n".ljust(35)
     output += "      |wAuthor|n".ljust(22)
-    output += "          |wDate Posted".ljust(13) + "\n"
+    output += "             |wDate Posted".ljust(13) + "\n"
     output += "|b=|n" * 78 + "\n"
-    for post in posts:
-        output += str(post.id).ljust(4)
+    for post in posts.order_by('sequence_number'):  # Ensure posts are ordered by sequence_number
+        output += str(post.sequence_number).ljust(4)  # Use sequence_number
         output += post.title.ljust(35)
         output += str(post.author.username).ljust(22)
-        output += post.created_at.strftime("%Y-%m-%d")
+        output += "   " + post.created_at.strftime("%Y-%m-%d")
         output += "\n" + "|b=|n" * 78 + "\n"
     return output
-
     
 def format_post(self, post):
     """
