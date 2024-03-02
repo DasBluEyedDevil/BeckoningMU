@@ -495,17 +495,23 @@ class CmdMyJobs(MuxCommand):
             self.caller.msg(f"Bucket named '{bucket_name}' not found.")
             return
     
-        # Ensure we use the caller's account as the creator of the job
-        creator_account = self.caller.account if hasattr(self.caller, 'account') else self.caller
+        # Ensuring we're using the account associated with the caller for the 'created_by' field
+        account = self.caller.account if hasattr(self.caller, 'account') else None
+    
+        # Check if the caller's account is valid before proceeding
+        if not account:
+            self.caller.msg("This command can only be used by a character with a valid account.")
+            return
     
         job = Job.objects.create(
             title=title.strip(),
             description=description.strip(),
-            created_by=self.caller,  # Assuming this should still reference the character
-            creator=creator_account,  # Correctly referencing the account for the creator field
+            created_by=account,  # Assigning the account to 'created_by'
+            creator=account,  # Also assigning the account to 'creator' if needed
             bucket=bucket
         )
         self.caller.msg(f"Job {job.id} created in bucket '{bucket.name}': {title}")
+
 
     def view_my_job(self):
         try:
