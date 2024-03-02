@@ -57,7 +57,7 @@ class CmdBBS(default_cmds.MuxCommand):
         boards = Board.objects.all()
         output = "|b=|n" * 78 + "\n"
         output += "  |wBoard Name|n".ljust(39)
-        output += "    |wLast Post|n".ljust(22)
+        output += "    |wLast Post|n".ljust(22)  # Header remains unchanged
         output += "           |w# of Messages".ljust(13) + "\n"
         output += "|b=|n" * 78 + "\n"
         for board in boards:
@@ -68,10 +68,12 @@ class CmdBBS(default_cmds.MuxCommand):
                     formatted_datetime = last_post.created_at.strftime("%Y-%m-%d")
                 num_posts = board.posts.count()
                 output += "  " + board.name[:34].ljust(39)
-                output += (" " * 2) + formatted_datetime.ljust(20)
+                # Adjust the left justification directly on the formatted date string
+                output += formatted_datetime.rjust(20)  # Use rjust to move the date to the left within its field
                 output += str(num_posts).rjust(9) + "\n"
         output += "|b=|n" * 78
         self.caller.msg(output)
+
 
     def view_board(self, board):
         "View specific board."
