@@ -4,7 +4,8 @@ from evennia.commands.default.muxcommand import MuxCommand
 from evennia.accounts.models import AccountDB
 from evennia.utils.ansi import ANSIString
 from evennia.contrib.game_systems.mail import CmdMail
-
+from jobs.models import Job, Comment
+from evennia.utils.utils import lazy_property
 
 class CmdBucket(MuxCommand):
     """
@@ -447,3 +448,77 @@ class CmdJob(MuxCommand):
 
         except Job.DoesNotExist:
             self.caller.msg(f"|wJOBS>|n No job with ID |w{id}|n exists.")
+
+
+class CmdMyJobs(MuxCommand):
+    """
+    Interact with your jobs.
+
+    Usage:
+      myjobs
+      myjobs/create <title>=<description>
+      myjobs/view <id>
+      myjobs/list
+
+    Allows players to manage their job submissions.
+    """
+    key = "myjobs"
+    locks = "cmd:all()"
+    help_category = "Jobs"
+
+    @lazy_property
+    def jobs(self):
+        return Job.objects.filter(created_by=self.caller)
+
+    def func(self):
+        if not self.args and not self.switches:
+            self.list_my_jobs()
+            return
+
+        if "create" in self.switches:
+            self.create_my_job()
+        elif "view" in self.switches:
+            self.view_my_job()
+        elif "list" in self.switches:
+            self.list_my_jobs()
+        else:
+            self.caller.msg("Invalid switch.")
+
+    def create_my_job(self):
+        try:
+            title, description = self.args.split("=", 1)
+            title = title.strip()
+            description = description.strip()
+            if not title or not description:
+                raise ValueError
+        except ValueError:
+            self.caller.msg("Usage: myjobs/create <title>=<description>")
+            return
+
+        job = Job.objects.create(
+            title=title,
+            description=description,
+            created_by=self.caller
+        )
+        self.caller.msg(f"Job {job.id} created: {title}")
+
+    def view_my_job(self):
+        try:
+            job_id = self.args.strip()
+            job = self.jobs.get(id=job_id)
+        except Job.DoesNotExist:
+            self.caller.msg("Job not found.")
+            return
+
+        output = f"Job {job.id}: {job.title}\nDescription: {job.description}\nStatus: {job.status}"
+        self.caller.msg(output)
+
+    def list_my_jobs(self):
+        jobs = self.jobs.all()
+        if jobs:
+            output = "|wYour Jobs|n\n"
+            for job in jobs:
+                output += f"{job.id}: {job.title} - {job.status}\n"
+            self.caller.msg(output)
+        else:
+            self.caller.msg("You have no jobs submitted.")
