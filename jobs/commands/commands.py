@@ -524,7 +524,7 @@ class CmdMyJobs(MuxCommand):
         output += "|R" + "=" * 78 + "|n\n"
     
         # Ticket Name and Status with a line of dark red ---'s below them
-        output += f"|w{'Ticket Name':<37}|{'Status':>40}|n\n"
+        output += f"|w{'Ticket Name':<37}|R"|"{'Status':>40}|n\n"
         output += "|R" + "-" * 78 + "|n\n"  # Dark red '-' characters for divider
     
         # Actual values for Ticket Name and Status
