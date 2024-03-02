@@ -412,27 +412,29 @@ class CmdJob(MuxCommand):
     
         caller = caller or self.caller
     
-        if "public" in self.switches:
-            public = True
+        # Determine if the comment is public based on the presence of the "public" switch
+        public = "public" in self.switches
     
         try:
             job = Job.objects.get(id=id)
             acct = AccountDB.objects.get(id=caller.id)
-            allaccts = [job.created_by]  # Assuming you want to notify the job creator
-    
             comm = Comment.objects.create(
                 job=job, public=public, author=acct, content=note)
-    
-            # Notifying job's creator
-            job.created_by.msg(f"|wJOBS>|n {acct.username} has added a comment to job |w#{job.id}|n")
-    
-            # Sending mail to the job's creator
+            
+            # If the comment is public, notify the job's creator and possibly other players
             if public:
-                CmdMail.send_mail(self, recipients=[job.created_by], caller=self.caller,
-                                  subject=f"New Comment on Job #{job.id}.", message=note)
+                # Notify the job's creator if they are not the one adding the comment
+                if job.created_by != caller:
+                    job.created_by.msg(f"|wJOBS>|n {acct.username} has added a public comment to job |w#{job.id}|n: {note}")
+                
+                # Here you can add logic to notify other players if necessary
     
+                # Send mail to the job's creator if the comment is public
+                CmdMail.send_mail(self, recipients=[job.created_by], caller=self.caller,
+                                  subject=f"New Public Comment on Job #{job.id}", message=note)
         except Job.DoesNotExist:
             self.caller.msg(f"|wJOBS>|n No job with ID |w{id}|n exists.")
+
 
 
 
