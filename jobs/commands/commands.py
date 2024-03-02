@@ -552,7 +552,7 @@ class CmdMyJobs(MuxCommand):
             output += ANSIString("|R-|n" * 78) + "\n"
             
             # Headers
-            header = f"|w{'ID':<5} {'Ticket Name':<20} {'Bucket':<15} {'Status':<15}|n"
+            header = f"|w{'ID':<5} {'Ticket Name':<20} {'              ' + 'Bucket':<15} {'Status':<15}|n"
             output += ANSIString(header) + "\n"
             output += ANSIString("|R-|n" * 78) + "\n"
             
