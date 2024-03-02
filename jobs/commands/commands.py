@@ -519,18 +519,18 @@ class CmdMyJobs(MuxCommand):
             return
     
         # Frame start with dark red framing
-        output = "|r" + "=" * 78 + "|n\n"  # Dark red '=' characters
+        output = "|R" + "=" * 78 + "|n\n"  # Dark red '=' characters
         job_title = f"Job #{job.id}"
         output += job_title.center(78, "=") + "\n"  # The title itself is not colored
-        output += "|r" + "=" * 78 + "|n\n"  # Dark red '=' characters
+        output += "|R" + "=" * 78 + "|n\n"  # Dark red '=' characters
     
         # Ticket Name and Status
         output += f"{'Ticket Name':<37}{'Status':>41}\n"
-        output += "|r" + "-" * 78 + "|n\n"  # Dark red '-' characters for divider
+        output += "|R" + "-" * 78 + "|n\n"  # Dark red '-' characters for divider
     
         # Description
         output += "Description:\n" + job.description + "\n"
-        output += "|r" + "-" * 78 + "|n\n"  # Dark red '-' characters for divider
+        output += "|R" + "-" * 78 + "|n\n"  # Dark red '-' characters for divider
     
         # Comments
         public_comments = job.comments.filter(public=True)
@@ -538,12 +538,13 @@ class CmdMyJobs(MuxCommand):
             output += "Comments:\n"
             for comment in public_comments:
                 output += f"- {comment.author.get_display_name(self.caller)}: {comment.content}\n"
-            output += "|r" + "=" * 78 + "|n\n"  # Dark red '=' characters for end frame
+            output += "|R" + "=" * 78 + "|n\n"  # Dark red '=' characters for end frame
         else:
             output += "No public comments.\n"
-            output += "|r" + "=" * 78 + "|n\n"  # Dark red '=' characters for end frame
+            output += "|R" + "=" * 78 + "|n\n"  # Dark red '=' characters for end frame
     
         self.caller.msg(output)
+
 
 
 
