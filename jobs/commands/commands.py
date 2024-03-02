@@ -420,7 +420,7 @@ class CmdJob(MuxCommand):
             acct = AccountDB.objects.get(id=caller.id)
             comm = Comment.objects.create(
                 job=job, public=public, author=acct, content=note)
-            
+            self.caller.msg(f"Your comment has been added to job |w#{job.id}|n.")
             # If the comment is public, notify the job's creator and possibly other players
             if public:
                 # Notify the job's creator if they are not the one adding the comment
