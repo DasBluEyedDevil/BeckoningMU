@@ -55,26 +55,47 @@ class CmdBBS(default_cmds.MuxCommand):
     def list_boards(self):
         "List all boards."
         boards = Board.objects.all()
-        output = "|b=|n" * 78 + "\n"
-        output += "  |wBoard Name|n".ljust(25)  # Adjust the column width as needed
-        output += "|wGroup|n".ljust(12)  # Adjust the column width as needed
-        output += "|wLast Post|n".ljust(20)  # Adjust the column width as needed
-        output += "|w# of Messages|n".rjust(13) + "\n"  # Right justify for numbers
-        output += "|b=|n" * 78 + "\n"
+        total_width = 78  # Total width for the output
+        border = "|b=|n" * (total_width // 2)  # Border adjusted for total width
+        # Define column widths based on total width
+        name_width = 25
+        group_width = 12
+        last_post_width = 20
+        message_count_width = total_width - (name_width + group_width + last_post_width)
+    
+        # Create header with adjusted widths
+        header = (
+            "|wBoard Name|n".ljust(name_width) +
+            "|wGroup|n".ljust(group_width) +
+            "|wLast Post|n".ljust(last_post_width) +
+            "|w# of Messages|n".rjust(message_count_width)
+        )
+    
+        # Initialize the output with the top border and header
+        output = f"{border}\n{header}\n{border}\n"
+    
+        # Iterate over the boards and create each row
         for board in boards:
             if board.read_perm == "all" or self.caller.check_permstring(board.read_perm):
                 last_post = board.posts.last()
-                formatted_datetime = "None"
-                if last_post:
-                    formatted_datetime = last_post.created_at.strftime("%Y-%m-%d")
-                num_posts = board.posts.count()
+                formatted_datetime = last_post.created_at.strftime("%Y-%m-%d") if last_post else "None"
+                num_posts = str(board.posts.count())
                 group_display = board.read_perm if board.read_perm != "all" else " "
-                output += board.name[:25].ljust(25)  # Adjust the slice and ljust to match the header width
-                output += group_display.ljust(12)  # Adjust the ljust to match the header width
-                output += formatted_datetime.ljust(20)  # Adjust the ljust to match the header width
-                output += str(num_posts).rjust(13) + "\n"  # Right justify for numbers
-        output += "|b=|n" * 78
+                
+                # Add each board's information to the output
+                output += (
+                    board.name.ljust(name_width) +
+                    group_display.ljust(group_width) +
+                    formatted_datetime.ljust(last_post_width) +
+                    num_posts.rjust(message_count_width) +
+                    "\n"
+                )
+    
+        # Add the bottom border to the output
+        output += border
+        # Send the output to the caller
         self.caller.msg(output)
+
 
 
 
