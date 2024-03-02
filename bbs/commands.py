@@ -380,13 +380,13 @@ def format_board_posts_output(self, posts, board):
     output += "|wID|n".ljust(4)  # Changed from ID to Seq for sequence number
     output += "  |wTitle|n".ljust(35)
     output += "      |wAuthor|n".ljust(22)
-    output += "          |wDate Posted".ljust(13) + "\n"
+    output += "             |wDate Posted".ljust(13) + "\n"
     output += "|b=|n" * 78 + "\n"
     for post in posts.order_by('sequence_number'):  # Ensure posts are ordered by sequence_number
         output += str(post.sequence_number).ljust(4)  # Use sequence_number
         output += post.title.ljust(35)
         output += str(post.author.username).ljust(22)
-        output += post.created_at.strftime("%Y-%m-%d")
+        output += "   " + post.created_at.strftime("%Y-%m-%d")
         output += "\n" + "|b=|n" * 78 + "\n"
     return output
     
