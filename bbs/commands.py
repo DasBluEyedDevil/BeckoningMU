@@ -56,10 +56,10 @@ class CmdBBS(default_cmds.MuxCommand):
         "List all boards."
         boards = Board.objects.all()
         output = "|b=|n" * 78 + "\n"
-        output += "  |wBoard Name|n".ljust(29)  # Adjust if needed based on actual board name lengths
-        output += " |wGroup|n".ljust(12)  # Adjusted for the new "Group" column header
-        output += "  |wLast Post|n".ljust(19)  # Adjust if needed based on actual date format lengths
-        output += " |w# of Messages|n".ljust(16) + "\n"  # Adjust if needed for message count digits
+        output += "  |wBoard Name|n".ljust(25)  # Adjust the column width as needed
+        output += "|wGroup|n".ljust(12)  # Adjust the column width as needed
+        output += "|wLast Post|n".ljust(20)  # Adjust the column width as needed
+        output += "|w# of Messages|n".rjust(13) + "\n"  # Right justify for numbers
         output += "|b=|n" * 78 + "\n"
         for board in boards:
             if board.read_perm == "all" or self.caller.check_permstring(board.read_perm):
@@ -69,12 +69,13 @@ class CmdBBS(default_cmds.MuxCommand):
                     formatted_datetime = last_post.created_at.strftime("%Y-%m-%d")
                 num_posts = board.posts.count()
                 group_display = board.read_perm if board.read_perm != "all" else " "
-                output += "  " + board.name[:24].ljust(29)  # Adjusted width for additional column
-                output += group_display.ljust(12)  # Display read_perm (now as Group) or space
-                output += formatted_datetime.ljust(19)  # Adjusted width
-                output += str(num_posts).ljust(16) + "\n"  # Adjusted for the message count
+                output += board.name[:25].ljust(25)  # Adjust the slice and ljust to match the header width
+                output += group_display.ljust(12)  # Adjust the ljust to match the header width
+                output += formatted_datetime.ljust(20)  # Adjust the ljust to match the header width
+                output += str(num_posts).rjust(13) + "\n"  # Right justify for numbers
         output += "|b=|n" * 78
         self.caller.msg(output)
+
 
 
     def view_board(self, board):
