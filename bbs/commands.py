@@ -70,7 +70,7 @@ class CmdBBS(default_cmds.MuxCommand):
                 num_posts = board.posts.count()
                 read_perm_display = board.read_perm if board.read_perm != "all" else "-"
                 output += "  " + board.name[:24].ljust(29)  # Adjusted spacing for new column
-                output += read_perm_display.ljust(10)  # Display read permission
+                output += read_perm_display.ljust(4)  # Display read permission
                 output += formatted_datetime.ljust(22)
                 output += str(num_posts).rjust(9) + "\n"
         output += "|b=|n" * 78
