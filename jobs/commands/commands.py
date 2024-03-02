@@ -518,33 +518,33 @@ class CmdMyJobs(MuxCommand):
             self.caller.msg("Job not found.")
             return
     
-        # Frame start
-        output = ANSIString("|R=|n" * 78) + "\n"
-        output += ANSIString(f"|wJob #{job.id}|n").center(78, "|R=|n") + "\n"
-        output += "|R=|n" * 78 + "\n"
+        # Frame start with dark red framing
+        output = "|r" + "=" * 78 + "|n\n"  # Dark red '=' characters
+        job_title = f"Job #{job.id}"
+        output += job_title.center(78, "=") + "\n"  # The title itself is not colored
+        output += "|r" + "=" * 78 + "|n\n"  # Dark red '=' characters
     
         # Ticket Name and Status
-        output += f"|w{'Ticket Name':<37}|R||n{'Status':>38}|n\n"
-        output += "|R-|n" * 78 + "\n"
-        output += f"{job.title:<37}|{job.status:>38}\n"
-        output += "|R-|n" * 78 + "\n"
+        output += f"{'Ticket Name':<37}{'Status':>41}\n"
+        output += "|r" + "-" * 78 + "|n\n"  # Dark red '-' characters for divider
     
         # Description
-        output += f"|wDescription:|n\n{job.description}\n"
-        output += "|R-|n" * 78 + "\n"
+        output += "Description:\n" + job.description + "\n"
+        output += "|r" + "-" * 78 + "|n\n"  # Dark red '-' characters for divider
     
         # Comments
         public_comments = job.comments.filter(public=True)
         if public_comments:
-            output += "|wComments:|n\n"
+            output += "Comments:\n"
             for comment in public_comments:
                 output += f"- {comment.author.get_display_name(self.caller)}: {comment.content}\n"
-            output += "|R=|n" * 78 + "\n"
+            output += "|r" + "=" * 78 + "|n\n"  # Dark red '=' characters for end frame
         else:
-            output += "|wNo public comments.|n\n"
-            output += "|R=|n" * 78 + "\n"
+            output += "No public comments.\n"
+            output += "|r" + "=" * 78 + "|n\n"  # Dark red '=' characters for end frame
     
         self.caller.msg(output)
+
 
 
 
@@ -556,6 +556,7 @@ class CmdMyJobs(MuxCommand):
             return
     
         jobs = self.jobs.all()
+        output = ""
         if jobs:
             # Start of frame
             output += ANSIString("|wYour Jobs|n").center(78, ANSIString("|R=|n")) + "\n"
