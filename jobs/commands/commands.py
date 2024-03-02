@@ -434,9 +434,6 @@ class CmdJob(MuxCommand):
                 allaccts.append(player)
                 player.msg(
                     f"|wJOBS>|n {acct.username} has added a comment to job |w#{job.id}|n")
-
-            # send a message to anyone with builder permissions or higher
-            # that a comment has been added to a job
             for player in filter(lambda x: self.caller.locks.check_lockstring(x, "perm(Admin)"), AccountDB.objects.all()):
                 allaccts.append(player)
                 player.msg(
@@ -488,20 +485,26 @@ class CmdMyJobs(MuxCommand):
 
     def create_my_job(self):
         try:
-            title, description = self.args.split("=", 1)
-            title = title.strip()
-            description = description.strip()
+            bucket_name, title_description = self.args.split(maxsplit=1)
+            title, description = title_description.split("=", 1)
+            bucket = Bucket.objects.get(name=bucket_name)
         except ValueError:
-            self.caller.msg("Usage: myjobs/create <title>=<description>")
+            self.caller.msg("Usage: myjobs/create <bucket_name> <title>=<description>")
+            return
+        except Bucket.DoesNotExist:
+            self.caller.msg(f"Bucket named '{bucket_name}' not found.")
             return
     
-        account = self.caller.account
+        # Use the retrieved bucket for the job creation
+        account = self.caller.account if hasattr(self.caller, 'account') else self.caller
         job = Job.objects.create(
-            title=title,
-            description=description,
-            created_by=account  # Use the account here
+            title=title.strip(),
+            description=description.strip(),
+            created_by=account,
+            bucket=bucket
         )
-        self.caller.msg(f"Job {job.id} created: {title}")
+        self.caller.msg(f"Job {job.id} created in bucket '{bucket.name}': {title}")
+
 
 
     def view_my_job(self):
