@@ -514,8 +514,8 @@ class CmdMyJobs(MuxCommand):
         self.caller.msg(output)
 
     def list_my_jobs(self):
+        self.caller.msg(f"Debug: Type of caller before listing jobs is {type(self.caller)}")
         if not isinstance(self.caller, ObjectDB):
-            self.caller.msg(f"Debug: Type of caller before listing jobs is {type(self.caller)}")
             self.caller.msg("This command can only be used by authenticated accounts.")
             return
     
