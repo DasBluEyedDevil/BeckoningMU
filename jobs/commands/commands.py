@@ -546,14 +546,14 @@ class CmdMyJobs(MuxCommand):
             # Start of frame
             output = ANSIString("|R=|n" * 39) + "\n"
             output += ANSIString("|wYour Jobs|n").center(78, ANSIString("|R=|n")) + "\n"
-            output += ANSIString("|R=|n" * 39) + "\n"
+            output += ANSIString("|R-|n" * 78) + "\n"
             
             for job in jobs:
                 output += ANSIString(
                     f"|w#{job.id}|n: {job.title} - Status: |w{job.status}|n\n")
             
             # End of frame
-            output += ANSIString("|R=|n" * 39) + "\n"
+            output += ANSIString("|R=|n" * 78) + "\n"
         else:
             output = "You have no jobs submitted."
         
