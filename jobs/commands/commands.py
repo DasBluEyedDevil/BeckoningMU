@@ -460,6 +460,7 @@ class CmdMyJobs(MuxCommand):
     Allows players to manage their job submissions.
     """
     key = "myjobs"
+    aliases = "myjob"
     locks = "cmd:all()"
     help_category = "Jobs"
 
