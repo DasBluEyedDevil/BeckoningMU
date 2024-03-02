@@ -68,7 +68,7 @@ class CmdBBS(default_cmds.MuxCommand):
                     formatted_datetime = last_post.created_at.strftime("%Y-%m-%d")
                 num_posts = board.posts.count()
                 output += "  " + board.name[:34].ljust(39)
-                output += formatted_datetime.ljust(20)
+                output += "  " + formatted_datetime.ljust(22)
                 output += str(num_posts).rjust(9) + "\n"
         output += "|b=|n" * 78
         self.caller.msg(output)
