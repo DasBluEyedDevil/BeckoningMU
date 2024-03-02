@@ -558,7 +558,6 @@ class CmdMyJobs(MuxCommand):
         jobs = self.jobs.all()
         if jobs:
             # Start of frame
-            output = ANSIString("|R=|n" * 39) + "\n"
             output += ANSIString("|wYour Jobs|n").center(78, ANSIString("|R=|n")) + "\n"
             output += ANSIString("|R-|n" * 78) + "\n"
             
