@@ -56,9 +56,10 @@ class CmdBBS(default_cmds.MuxCommand):
         "List all boards."
         boards = Board.objects.all()
         output = "|b=|n" * 78 + "\n"
-        output += "  |wBoard Name|n".ljust(39)
-        output += "      |wLast Post|n".ljust(22)
-        output += "           |w# of Messages".ljust(13) + "\n"
+        output += "  |wBoard Name|n".ljust(29)  # Adjusted spacing for new column
+        output += " |wGroup|n".ljust(10)  # New column for read permissions
+        output += "          |wLast Post|n".ljust(22)
+        output += "              |w# of Messages".ljust(13) + "\n"
         output += "|b=|n" * 78 + "\n"
         for board in boards:
             if board.read_perm == "all" or self.caller.check_permstring(board.read_perm):
@@ -67,11 +68,14 @@ class CmdBBS(default_cmds.MuxCommand):
                 if last_post:
                     formatted_datetime = last_post.created_at.strftime("%Y-%m-%d")
                 num_posts = board.posts.count()
-                output += "  " + board.name[:34].ljust(39)
+                read_perm_display = board.read_perm if board.read_perm != "all" else "-"
+                output += "  " + board.name[:24].ljust(23)  # Adjusted spacing for new column
+                output += read_perm_display.ljust(16)  # Display read permission
                 output += formatted_datetime.ljust(22)
                 output += str(num_posts).rjust(9) + "\n"
         output += "|b=|n" * 78
         self.caller.msg(output)
+
 
     def view_board(self, board):
         "View specific board."
