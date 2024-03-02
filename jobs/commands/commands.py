@@ -551,9 +551,15 @@ class CmdMyJobs(MuxCommand):
             output += ANSIString("|wYour Jobs|n").center(78, ANSIString("|R=|n")) + "\n"
             output += ANSIString("|R-|n" * 78) + "\n"
             
+            # Headers
+            header = f"|w{'ID':<5} {'Ticket Name':<20} {'Bucket':<15} {'Status':<15}|n"
+            output += ANSIString(header) + "\n"
+            output += ANSIString("|R-|n" * 78) + "\n"
+            
+            # Job data
             for job in jobs:
-                output += ANSIString(
-                    f"|w#{job.id}|n: {job.title} - Status: |w{job.status}|n\n")
+                job_line = f"{job.id:<5} {job.title:<20} {job.bucket.name:<15} {job.status:<15}"
+                output += ANSIString(job_line) + "\n"
             
             # End of frame
             output += ANSIString("|R=|n" * 78) + "\n"
@@ -561,5 +567,6 @@ class CmdMyJobs(MuxCommand):
             output = "You have no jobs submitted."
         
         self.caller.msg(output)
+
 
 
