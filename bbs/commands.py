@@ -56,8 +56,7 @@ class CmdBBS(default_cmds.MuxCommand):
         "List all boards."
         boards = Board.objects.all()
         output = "|b=|n" * 78 + "\n"
-        output += "|wID|n".ljust(4)
-        output += "  |wBoard Name|n".ljust(35)
+        output += "  |wBoard Name|n".ljust(39)
         output += "      |wLast Post|n".ljust(22)
         output += "           |w# of Messages".ljust(13) + "\n"
         output += "|b=|n" * 78 + "\n"
@@ -68,8 +67,7 @@ class CmdBBS(default_cmds.MuxCommand):
                 if last_post:
                     formatted_datetime = last_post.created_at.strftime("%Y-%m-%d")
                 num_posts = board.posts.count()
-                output += str(board.id).ljust(4)
-                output += board.name[:34].ljust(35)
+                output += board.name[:34].ljust(39)
                 output += formatted_datetime.ljust(22)
                 output += str(num_posts).rjust(9) + "\n"
         output += "|b=|n" * 78
