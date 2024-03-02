@@ -515,11 +515,25 @@ class CmdMyJobs(MuxCommand):
 
 
     def view_my_job(self):
-        # Your existing logic for viewing a job...
+        try:
+            job_id = self.args.strip()
+            # Ensure we are querying within the jobs accessible by this account
+            account = self.caller.account if hasattr(self.caller, 'account') else None
+            if not account:
+                self.caller.msg("This command can only be used by a character with a valid account.")
+                return
+    
+            job = self.jobs.get(id=job_id)
+        except Job.DoesNotExist:
+            self.caller.msg("Job not found.")
+            return
+    
         output = ANSIString("|R=|n" * 39) + "\n"
         output += ANSIString(f"|wJob {job.id}|n: {job.title}\nDescription: {job.description}\nStatus: |w{job.status}|n").center(78) + "\n"
         output += ANSIString("|R=|n" * 39) + "\n"
+    
         self.caller.msg(output)
+
 
 
     def list_my_jobs(self):
