@@ -558,7 +558,7 @@ class CmdMyJobs(MuxCommand):
             
             # Job data
             for job in jobs:
-                job_line = f"{job.id:<5} {job.title:<20} {job.bucket.name:<15} {job.status:<15}"
+                job_line = f"{job.id:<5} {job.title:<20} {'              ' + job.bucket.name:<15} {'            ' + job.status:<15}"
                 output += ANSIString(job_line) + "\n"
             
             # End of frame
