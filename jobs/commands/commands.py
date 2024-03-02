@@ -517,11 +517,23 @@ class CmdMyJobs(MuxCommand):
             self.caller.msg("Job not found.")
             return
     
+        # Start building the output with job details
         output = ANSIString("|R=|n" * 39) + "\n"
-        output += ANSIString(f"|wJob {job.id}|n: {job.title}\nDescription: {job.description}\nStatus: |w{job.status}|n").center(78) + "\n"
+        output += ANSIString(f"|wJob {job.id}|n: {job.title}\nDescription: {job.description}\nStatus: |w{job.status}|n").center(78, " ") + "\n"
         output += ANSIString("|R=|n" * 39) + "\n"
     
+        # Fetching and displaying public comments
+        public_comments = job.comments.filter(public=True)
+        if public_comments:
+            output += "\n" + ANSIString("|wPublic Comments:|n").center(78, " ") + "\n"
+            output += ANSIString("|R=|n" * 39) + "\n"
+            for comment in public_comments:
+                comment_output = f" - {comment.author.get_display_name(self.caller)}: {comment.content}\n"
+                output += ANSIString(comment_output).ljust(78) + "\n"
+            output += ANSIString("|R=|n" * 39) + "\n"
+    
         self.caller.msg(output)
+
 
 
 
