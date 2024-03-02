@@ -468,7 +468,9 @@ class CmdMyJobs(MuxCommand):
 
     @lazy_property
     def jobs(self):
-        return Job.objects.filter(created_by=self.caller)
+        account = self.caller.account
+        return Job.objects.filter(created_by=account)
+
 
     def func(self):
         if not self.args and not self.switches:
@@ -489,18 +491,18 @@ class CmdMyJobs(MuxCommand):
             title, description = self.args.split("=", 1)
             title = title.strip()
             description = description.strip()
-            if not title or not description:
-                raise ValueError
         except ValueError:
             self.caller.msg("Usage: myjobs/create <title>=<description>")
             return
-
+    
+        account = self.caller.account
         job = Job.objects.create(
             title=title,
             description=description,
-            created_by=self.caller
+            created_by=account  # Use the account here
         )
         self.caller.msg(f"Job {job.id} created: {title}")
+
 
     def view_my_job(self):
         try:
