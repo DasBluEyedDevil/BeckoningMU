@@ -55,48 +55,26 @@ class CmdBBS(default_cmds.MuxCommand):
     def list_boards(self):
         "List all boards."
         boards = Board.objects.all()
-        total_width = 78  # Total width for the output
-        border = "|b=|n" * (total_width // 2)  # Border adjusted for total width
-        # Define column widths based on total width
-        name_width = 25
-        group_width = 12
-        last_post_width = 20
-        message_count_width = total_width - (name_width + group_width + last_post_width)
-    
-        # Create header with adjusted widths
-        header = (
-            "|wBoard Name|n".ljust(name_width) +
-            "|wGroup|n".ljust(group_width) +
-            "|wLast Post|n".ljust(last_post_width) +
-            "|w# of Messages|n".rjust(message_count_width)
-        )
-    
-        # Initialize the output with the top border and header
-        output = f"{border}\n{header}\n{border}\n"
-    
-        # Iterate over the boards and create each row
+        output = "|b=|n" * 78 + "\n"
+        output += "  |wBoard Name|n".ljust(29)  # Adjusted spacing for new column
+        output += "|wRead Perm|n".ljust(10)  # New column for read permissions
+        output += "      |wLast Post|n".ljust(22)
+        output += "           |w# of Messages".ljust(13) + "\n"
+        output += "|b=|n" * 78 + "\n"
         for board in boards:
             if board.read_perm == "all" or self.caller.check_permstring(board.read_perm):
                 last_post = board.posts.last()
-                formatted_datetime = last_post.created_at.strftime("%Y-%m-%d") if last_post else "None"
-                num_posts = str(board.posts.count())
-                group_display = board.read_perm if board.read_perm != "all" else " "
-                
-                # Add each board's information to the output
-                output += (
-                    board.name.ljust(name_width) +
-                    group_display.ljust(group_width) +
-                    formatted_datetime.ljust(last_post_width) +
-                    num_posts.rjust(message_count_width) +
-                    "\n"
-                )
-    
-        # Add the bottom border to the output
-        output += border
-        # Send the output to the caller
+                formatted_datetime = "None"
+                if last_post:
+                    formatted_datetime = last_post.created_at.strftime("%Y-%m-%d")
+                num_posts = board.posts.count()
+                read_perm_display = board.read_perm if board.read_perm != "all" else "-"
+                output += "  " + board.name[:24].ljust(29)  # Adjusted spacing for new column
+                output += read_perm_display.ljust(10)  # Display read permission
+                output += formatted_datetime.ljust(22)
+                output += str(num_posts).rjust(9) + "\n"
+        output += "|b=|n" * 78
         self.caller.msg(output)
-
-
 
 
     def view_board(self, board):
