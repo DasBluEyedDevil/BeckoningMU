@@ -1,5 +1,5 @@
 from jobs.models import Bucket, Job, Comment
-
+from evennia.objects.models import ObjectDB
 from evennia.commands.default.muxcommand import MuxCommand
 from evennia.accounts.models import AccountDB
 from evennia.utils.ansi import ANSIString
