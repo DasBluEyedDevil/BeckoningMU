@@ -519,35 +519,35 @@ class CmdMyJobs(MuxCommand):
             return
     
         # Frame start with dark red framing
-        output = "|R" + "=" * 78 + "|n\n"  # Dark red '=' characters
-        job_title = f"Job #{job.id}"
-        output += job_title.center(78, "=") + "\n"  # The title itself is not colored
-        output += "|R" + "=" * 78 + "|n\n"  # Dark red '=' characters
+        output = "|R" + "=" * 78 + "|n\n"
+        output += ("|wJob #" + str(job.id) + "|n").center(78, " ") + "\n"
+        output += "|R" + "=" * 78 + "|n\n"
     
-        # Ticket Name and Status
-        output += f"{'Ticket Name':<37}{'Status':>41}\n"
+        # Ticket Name and Status with a line of dark red ---'s below them
+        output += f"|w{'Ticket Name':<37}|{'Status':>40}|n\n"
         output += "|R" + "-" * 78 + "|n\n"  # Dark red '-' characters for divider
+    
+        # Actual values for Ticket Name and Status
+        output += f"{job.title:<37}|{job.status:>40}\n"
+        output += "|R" + "-" * 78 + "|n\n"  # Dark red '-' characters for another divider before Description
     
         # Description
-        output += "Description:\n" + job.description + "\n"
-        output += "|R" + "-" * 78 + "|n\n"  # Dark red '-' characters for divider
+        output += "|wDescription:|n\n" + job.description + "\n"
+        output += "|R" + "-" * 78 + "|n\n"  # Dark red '-' characters for divider before Comments
     
         # Comments
         public_comments = job.comments.filter(public=True)
         if public_comments:
-            output += "Comments:\n"
+            output += "|wComments:|n\n"
             for comment in public_comments:
                 output += f"- {comment.author.get_display_name(self.caller)}: {comment.content}\n"
-            output += "|R" + "=" * 78 + "|n\n"  # Dark red '=' characters for end frame
         else:
-            output += "No public comments.\n"
-            output += "|R" + "=" * 78 + "|n\n"  # Dark red '=' characters for end frame
+            output += "|wNo public comments.|n\n"
+    
+        # End frame
+        output += "|R" + "=" * 78 + "|n\n"
     
         self.caller.msg(output)
-
-
-
-
 
 
 
