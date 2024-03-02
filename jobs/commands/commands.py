@@ -515,7 +515,7 @@ class CmdMyJobs(MuxCommand):
 
     def list_my_jobs(self):
         from type(self.caller) is evennia.objects.models.ObjectDB
-        if not isinstance(self.caller.account, AccountDB):
+        if isinstance(self.caller, ObjectDB):
             self.caller.msg("This command can only be used by authenticated accounts.")
             return
         jobs = self.jobs.all()
