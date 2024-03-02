@@ -514,10 +514,10 @@ class CmdMyJobs(MuxCommand):
         self.caller.msg(output)
 
     def list_my_jobs(self):
-        from type(self.caller) is evennia.objects.models.ObjectDB
-        if isinstance(self.caller, ObjectDB):
+        if not isinstance(self.caller, ObjectDB):
             self.caller.msg("This command can only be used by authenticated accounts.")
             return
+    
         jobs = self.jobs.all()
         if jobs:
             output = "|wYour Jobs|n\n"
@@ -526,3 +526,4 @@ class CmdMyJobs(MuxCommand):
             self.caller.msg(output)
         else:
             self.caller.msg("You have no jobs submitted.")
+
