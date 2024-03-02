@@ -519,19 +519,19 @@ class CmdMyJobs(MuxCommand):
             return
     
         # Frame start
-        output = ANSIString("=" * 78) + "\n"
-        output += ANSIString(f"|wJob #{job.id}|n").center(78, "=") + "\n"
-        output += "=" * 78 + "\n"
+        output = ANSIString("|R=|n" * 78) + "\n"
+        output += ANSIString(f"|wJob #{job.id}|n").center(78, "|R=|n") + "\n"
+        output += "|R=|n" * 78 + "\n"
     
         # Ticket Name and Status
-        output += f"|w{'Ticket Name':<37}|{'Status':>38}|n\n"
-        output += "-" * 78 + "\n"
+        output += f"|w{'Ticket Name':<37}|R||n{'Status':>38}|n\n"
+        output += "|R-|n" * 78 + "\n"
         output += f"{job.title:<37}|{job.status:>38}\n"
-        output += "-" * 78 + "\n"
+        output += "|R-|n" * 78 + "\n"
     
         # Description
         output += f"|wDescription:|n\n{job.description}\n"
-        output += "-" * 78 + "\n"
+        output += "|R-|n" * 78 + "\n"
     
         # Comments
         public_comments = job.comments.filter(public=True)
@@ -539,10 +539,10 @@ class CmdMyJobs(MuxCommand):
             output += "|wComments:|n\n"
             for comment in public_comments:
                 output += f"- {comment.author.get_display_name(self.caller)}: {comment.content}\n"
-            output += "=" * 78 + "\n"
+            output += "|R=|n" * 78 + "\n"
         else:
             output += "|wNo public comments.|n\n"
-            output += "=" * 78 + "\n"
+            output += "|R=|n" * 78 + "\n"
     
         self.caller.msg(output)
 
