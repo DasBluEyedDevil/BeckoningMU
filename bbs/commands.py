@@ -56,10 +56,10 @@ class CmdBBS(default_cmds.MuxCommand):
         "List all boards."
         boards = Board.objects.all()
         output = "|b=|n" * 78 + "\n"
-        output += "  |wBoard Name|n".ljust(29)  # Adjusted spacing for new column
-        output += "|wRead Perm|n".ljust(10)  # New column for read permissions
-        output += "      |wLast Post|n".ljust(22)
-        output += "           |w# of Messages".ljust(13) + "\n"
+        output += "  |wBoard Name|n".ljust(29)  # Adjust if needed based on actual board name lengths
+        output += " |wGroup|n".ljust(12)  # Adjusted for the new "Group" column header
+        output += "  |wLast Post|n".ljust(19)  # Adjust if needed based on actual date format lengths
+        output += " |w# of Messages|n".ljust(16) + "\n"  # Adjust if needed for message count digits
         output += "|b=|n" * 78 + "\n"
         for board in boards:
             if board.read_perm == "all" or self.caller.check_permstring(board.read_perm):
@@ -68,13 +68,14 @@ class CmdBBS(default_cmds.MuxCommand):
                 if last_post:
                     formatted_datetime = last_post.created_at.strftime("%Y-%m-%d")
                 num_posts = board.posts.count()
-                read_perm_display = board.read_perm if board.read_perm != "all" else "-"
-                output += "  " + board.name[:24].ljust(29)  # Adjusted spacing for new column
-                output += read_perm_display.ljust(10)  # Display read permission
-                output += formatted_datetime.ljust(22)
-                output += str(num_posts).rjust(9) + "\n"
+                group_display = board.read_perm if board.read_perm != "all" else " "
+                output += "  " + board.name[:24].ljust(29)  # Adjusted width for additional column
+                output += group_display.ljust(12)  # Display read_perm (now as Group) or space
+                output += formatted_datetime.ljust(19)  # Adjusted width
+                output += str(num_posts).ljust(16) + "\n"  # Adjusted for the message count
         output += "|b=|n" * 78
         self.caller.msg(output)
+
 
     def view_board(self, board):
         "View specific board."
