@@ -1,6 +1,5 @@
 from evennia import CmdSet
-from jobs.commands.commands import CmdBucket, CmdJob
-from commands.myjobs import CmdMyJobs
+from jobs.commands.commands import CmdBucket, CmdJob, CmdMyJobs
 
 
 class JobCmdSet(CmdSet):
