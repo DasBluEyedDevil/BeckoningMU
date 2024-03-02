@@ -403,48 +403,37 @@ class CmdJob(MuxCommand):
         pass
 
     def job_comment(self, id=None, note=None, public=False, caller=None):
-        """
-        Add a comment to a job.
-        """
         try:
             id = id or self.lhs
             note = note or self.rhs.strip()
         except ValueError:
-            if "public" in self.switches:
-                self.caller.msg("|wJOBS>|n Usage: job/public <id>=<comment>")
-            else:
-                self.caller.msg("|wJOBS>|n Usage: job/add <id>=<comment>")
+            self.caller.msg("|wJOBS>|n Usage: job/public <id>=<comment>" if "public" in self.switches else "|wJOBS>|n Usage: job/add <id>=<comment>")
             return
-
-        try:
-            caller = caller or self.caller
-        except ValueError:
-            caller = self.caller
-
+    
+        caller = caller or self.caller
+    
         if "public" in self.switches:
             public = True
-
+    
         try:
             job = Job.objects.get(id=id)
             acct = AccountDB.objects.get(id=caller.id)
-            allaccts = []
+            allaccts = [job.created_by]  # Assuming you want to notify the job creator
+    
             comm = Comment.objects.create(
                 job=job, public=public, author=acct, content=note)
-            for player in job.players.all():
-                allaccts.append(player)
-                player.msg(
-                    f"|wJOBS>|n {acct.username} has added a comment to job |w#{job.id}|n")
-            for player in filter(lambda x: self.caller.locks.check_lockstring(x, "perm(Admin)"), AccountDB.objects.all()):
-                allaccts.append(player)
-                player.msg(
-                    f"|wJOBS>|n {acct.username} has added a comment to job |w#{job.id}|n")
-                note = f"JOB |w#{job.id}>|n {acct.get_display_name(player)} |y[{comm.created_at.strftime('%m/%d/%Y-%I:%M:%S%p')}]|n: {note}"
+    
+            # Notifying job's creator
+            job.created_by.msg(f"|wJOBS>|n {acct.username} has added a comment to job |w#{job.id}|n")
+    
+            # Sending mail to the job's creator
             if public:
-                CmdMail.send_mail(self, recipients=allaccts, caller=self.caller,
+                CmdMail.send_mail(self, recipients=[job.created_by], caller=self.caller,
                                   subject=f"New Comment on Job #{job.id}.", message=note)
-
+    
         except Job.DoesNotExist:
             self.caller.msg(f"|wJOBS>|n No job with ID |w{id}|n exists.")
+
 
 
 class CmdMyJobs(MuxCommand):
