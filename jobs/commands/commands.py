@@ -490,7 +490,7 @@ class CmdMyJobs(MuxCommand):
             title, description = title_description.split("=", 1)
             bucket = Bucket.objects.get(name=bucket_name)
         except ValueError:
-            self.caller.msg("Usage: myjobs/create <bucket_name> <title>=<description>")
+            self.caller.msg(ANSIString(f"|wJob {job.id} created in bucket '{bucket.name}': {title}|n"))
             return
         except Bucket.DoesNotExist:
             self.caller.msg(f"Bucket named '{bucket_name}' not found.")
@@ -515,28 +515,34 @@ class CmdMyJobs(MuxCommand):
 
 
     def view_my_job(self):
-        try:
-            job_id = self.args.strip()
-            job = self.jobs.get(id=job_id)
-        except Job.DoesNotExist:
-            self.caller.msg("Job not found.")
-            return
-
-        output = f"Job {job.id}: {job.title}\nDescription: {job.description}\nStatus: {job.status}"
+        # Your existing logic for viewing a job...
+        output = ANSIString("|R=|n" * 39) + "\n"
+        output += ANSIString(f"|wJob {job.id}|n: {job.title}\nDescription: {job.description}\nStatus: |w{job.status}|n").center(78) + "\n"
+        output += ANSIString("|R=|n" * 39) + "\n"
         self.caller.msg(output)
 
+
     def list_my_jobs(self):
-        self.caller.msg(f"Debug: Type of caller before listing jobs is {type(self.caller)}")
         if not isinstance(self.caller, ObjectDB):
             self.caller.msg("This command can only be used by authenticated accounts.")
             return
     
         jobs = self.jobs.all()
         if jobs:
-            output = "|wYour Jobs|n\n"
+            # Start of frame
+            output = ANSIString("|R=|n" * 39) + "\n"
+            output += ANSIString("|wYour Jobs|n").center(78, ANSIString("|R=|n")) + "\n"
+            output += ANSIString("|R=|n" * 39) + "\n"
+            
             for job in jobs:
-                output += f"{job.id}: {job.title} - {job.status}\n"
-            self.caller.msg(output)
+                output += ANSIString(
+                    f"|w#{job.id}|n: {job.title} - Status: |w{job.status}|n\n")
+            
+            # End of frame
+            output += ANSIString("|R=|n" * 39) + "\n"
         else:
-            self.caller.msg("You have no jobs submitted.")
+            output = "You have no jobs submitted."
+        
+        self.caller.msg(output)
+
 
