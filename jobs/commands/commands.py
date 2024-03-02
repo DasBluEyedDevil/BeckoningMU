@@ -495,17 +495,17 @@ class CmdMyJobs(MuxCommand):
             self.caller.msg(f"Bucket named '{bucket_name}' not found.")
             return
     
-        # Use the retrieved bucket for the job creation
-        account = self.caller.account if hasattr(self.caller, 'account') else self.caller
+        # Ensure we use the caller's account as the creator of the job
+        creator_account = self.caller.account if hasattr(self.caller, 'account') else self.caller
+    
         job = Job.objects.create(
             title=title.strip(),
             description=description.strip(),
-            created_by=account,
+            created_by=self.caller,  # Assuming this should still reference the character
+            creator=creator_account,  # Correctly referencing the account for the creator field
             bucket=bucket
         )
         self.caller.msg(f"Job {job.id} created in bucket '{bucket.name}': {title}")
-
-
 
     def view_my_job(self):
         try:
