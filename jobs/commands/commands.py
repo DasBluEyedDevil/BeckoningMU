@@ -1,10 +1,11 @@
 from jobs.models import Bucket, Job, Comment
-
+from evennia.objects.models import ObjectDB
 from evennia.commands.default.muxcommand import MuxCommand
 from evennia.accounts.models import AccountDB
 from evennia.utils.ansi import ANSIString
 from evennia.contrib.game_systems.mail import CmdMail
-
+from jobs.models import Job, Comment
+from evennia.utils.utils import lazy_property
 
 class CmdBucket(MuxCommand):
     """
@@ -402,48 +403,182 @@ class CmdJob(MuxCommand):
         pass
 
     def job_comment(self, id=None, note=None, public=False, caller=None):
-        """
-        Add a comment to a job.
-        """
         try:
             id = id or self.lhs
             note = note or self.rhs.strip()
         except ValueError:
-            if "public" in self.switches:
-                self.caller.msg("|wJOBS>|n Usage: job/public <id>=<comment>")
-            else:
-                self.caller.msg("|wJOBS>|n Usage: job/add <id>=<comment>")
+            self.caller.msg("|wJOBS>|n Usage: job/public <id>=<comment>" if "public" in self.switches else "|wJOBS>|n Usage: job/add <id>=<comment>")
             return
-
-        try:
-            caller = caller or self.caller
-        except ValueError:
-            caller = self.caller
-
-        if "public" in self.switches:
-            public = True
-
+    
+        caller = caller or self.caller
+    
+        # Determine if the comment is public based on the presence of the "public" switch
+        public = "public" in self.switches
+    
         try:
             job = Job.objects.get(id=id)
             acct = AccountDB.objects.get(id=caller.id)
-            allaccts = []
             comm = Comment.objects.create(
                 job=job, public=public, author=acct, content=note)
-            for player in job.players.all():
-                allaccts.append(player)
-                player.msg(
-                    f"|wJOBS>|n {acct.username} has added a comment to job |w#{job.id}|n")
-
-            # send a message to anyone with builder permissions or higher
-            # that a comment has been added to a job
-            for player in filter(lambda x: self.caller.locks.check_lockstring(x, "perm(Admin)"), AccountDB.objects.all()):
-                allaccts.append(player)
-                player.msg(
-                    f"|wJOBS>|n {acct.username} has added a comment to job |w#{job.id}|n")
-                note = f"JOB |w#{job.id}>|n {acct.get_display_name(player)} |y[{comm.created_at.strftime('%m/%d/%Y-%I:%M:%S%p')}]|n: {note}"
+            self.caller.msg(f"Your comment has been added to job |w#{job.id}|n.")
+            # If the comment is public, notify the job's creator and possibly other players
             if public:
-                CmdMail.send_mail(self, recipients=allaccts, caller=self.caller,
-                                  subject=f"New Comment on Job #{job.id}.", message=note)
-
+                # Notify the job's creator if they are not the one adding the comment
+                if job.created_by != caller:
+                    job.created_by.msg(f"|wJOBS>|n {acct.username} has added a public comment to job |w#{job.id}|n: {note}")
+                
+                # Here you can add logic to notify other players if necessary
+    
+                # Send mail to the job's creator if the comment is public
+                CmdMail.send_mail(self, recipients=[job.created_by], caller=self.caller,
+                                  subject=f"New Public Comment on Job #{job.id}", message=note)
         except Job.DoesNotExist:
             self.caller.msg(f"|wJOBS>|n No job with ID |w{id}|n exists.")
+
+
+
+
+class CmdMyJobs(MuxCommand):
+    """
+    Interact with your jobs.
+
+    Usage:
+      myjobs
+      myjobs/create <title>=<description>
+      myjobs/view <id>
+      myjobs/list
+
+    Allows players to manage their job submissions.
+    """
+    key = "myjobs"
+    aliases = "myjob"
+    locks = "cmd:all()"
+    help_category = "Jobs"
+
+    @lazy_property
+    def jobs(self):
+        account = self.caller.account
+        return Job.objects.filter(created_by=account)
+
+
+    def func(self):
+        if not self.args and not self.switches:
+            self.list_my_jobs()
+            return
+
+        if "create" in self.switches:
+            self.create_my_job()
+        elif "view" in self.switches:
+            self.view_my_job()
+        elif "list" in self.switches:
+            self.list_my_jobs()
+        else:
+            self.caller.msg("Invalid switch.")
+
+    def create_my_job(self):
+        try:
+            bucket_name, title_description = self.args.split(maxsplit=1)
+            title, description = title_description.split("=", 1)
+            bucket = Bucket.objects.get(name=bucket_name)
+        except ValueError:
+            self.caller.msg(ANSIString(f"|wJob {job.id} created in bucket '{bucket.name}': {title}|n"))
+            return
+        except Bucket.DoesNotExist:
+            self.caller.msg(f"Bucket named '{bucket_name}' not found.")
+            return
+    
+        # Ensuring we're using the account associated with the caller for the 'created_by' field
+        account = self.caller.account if hasattr(self.caller, 'account') else None
+    
+        # Check if the caller's account is valid before proceeding
+        if not account:
+            self.caller.msg("This command can only be used by a character with a valid account.")
+            return
+    
+        job = Job.objects.create(
+            title=title.strip(),
+            description=description.strip(),
+            created_by=account,  # Assigning the account to 'created_by'
+            creator=account,  # Also assigning the account to 'creator' if needed
+            bucket=bucket
+        )
+        self.caller.msg(f"Job {job.id} created in bucket '{bucket.name}': {title}")
+
+
+    def view_my_job(self):
+        try:
+            job_id = self.args.strip()
+            account = self.caller.account if hasattr(self.caller, 'account') else None
+            if not account:
+                self.caller.msg("This command can only be used by a character with a valid account.")
+                return
+    
+            job = self.jobs.get(id=job_id)
+        except Job.DoesNotExist:
+            self.caller.msg("Job not found.")
+            return
+    
+        # Frame start with dark red framing
+        output = "|R" + "=" * 78 + "|n\n"
+        output += ("|wJob #" + str(job.id) + "|n").center(78, " ") + "\n"
+        output += "|R" + "=" * 78 + "|n\n"
+    
+        # Ticket Name and Status with a line of dark red ---'s below them
+        output += f"|w{'Ticket Name':<37}|{'Status':>40}|n\n"
+        output += "|R" + "-" * 78 + "|n\n"  # Dark red '-' characters for divider
+    
+        # Actual values for Ticket Name and Status
+        output += f"{job.title:<37}|{job.status:>40}\n"
+        output += "|R" + "-" * 78 + "|n\n"  # Dark red '-' characters for another divider before Description
+    
+        # Description
+        output += "|wDescription:|n\n" + job.description + "\n"
+        output += "|R" + "-" * 78 + "|n\n"  # Dark red '-' characters for divider before Comments
+    
+        # Comments
+        public_comments = job.comments.filter(public=True)
+        if public_comments:
+            output += "|wComments:|n\n"
+            for comment in public_comments:
+                output += f"- {comment.author.get_display_name(self.caller)}: {comment.content}\n"
+        else:
+            output += "|wNo public comments.|n\n"
+    
+        # End frame
+        output += "|R" + "=" * 78 + "|n\n"
+    
+        self.caller.msg(output)
+
+
+
+    def list_my_jobs(self):
+        if not isinstance(self.caller, ObjectDB):
+            self.caller.msg("This command can only be used by authenticated accounts.")
+            return
+    
+        jobs = self.jobs.all()
+        output = ""
+        if jobs:
+            # Start of frame
+            output += ANSIString("|wYour Jobs|n").center(78, ANSIString("|R=|n")) + "\n"
+            output += ANSIString("|R-|n" * 78) + "\n"
+            
+            # Headers
+            header = f"|w{'ID':<5} {'Ticket Name':<20} {'              ' + 'Bucket':<15} {'            ' + 'Status':<15}|n"
+            output += ANSIString(header) + "\n"
+            output += ANSIString("|R-|n" * 78) + "\n"
+            
+            # Job data
+            for job in jobs:
+                job_line = f"{job.id:<5} {job.title:<20} {'              ' + job.bucket.name:<15} {'              ' + job.status:<15}"
+                output += ANSIString(job_line) + "\n"
+            
+            # End of frame
+            output += ANSIString("|R=|n" * 78) + "\n"
+        else:
+            output = "You have no jobs submitted."
+        
+        self.caller.msg(output)
+
+
+

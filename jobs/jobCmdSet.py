@@ -1,5 +1,5 @@
 from evennia import CmdSet
-from jobs.commands.commands import CmdBucket, CmdJob
+from jobs.commands.commands import CmdBucket, CmdJob, CmdMyJobs
 
 
 class JobCmdSet(CmdSet):
@@ -12,3 +12,4 @@ class JobCmdSet(CmdSet):
     def at_cmdset_creation(self):
         self.add(CmdBucket())
         self.add(CmdJob())
+        self.add(CmdMyJobs())
