@@ -47,6 +47,21 @@ COLOR_ANSI_XTERM256_BRIGHT_BG_EXTRA_MAP = color_markups.MUX_COLOR_ANSI_XTERM256_
 
 TELNET_PORTS = [6666]
 
+OPTIONS_ACCOUNT_DEFAULT = {
+    "border_color": ("Headers, footers, table borders, etc.", "Color", "R"),
+    "header_star_color": ("* inside Header lines.", "Color", "n"),
+    "header_text_color": ("Text inside Header lines.", "Color", "w"),
+    "header_fill": ("Fill for Header lines.", "Text", "="),
+    "separator_star_color": ("* inside Separator lines.", "Color", "n"),
+    "separator_text_color": ("Text inside Separator lines.", "Color", "w"),
+    "separator_fill": ("Fill for Separator Lines.", "Text", "-"),
+    "footer_star_color": ("* inside Footer lines.", "Color", "n"),
+    "footer_text_color": ("Text inside Footer Lines.", "Color", "n"),
+    "footer_fill": ("Fill for Footer Lines.", "Text", "="),
+    "column_names_color": ("Table column header text.", "Color", "w"),
+    "timezone": ("Timezone for dates.", "Timezone", "UTC"),
+}
+
 ######################################################################
 # Settings given in secret_settings.py override those in this file.
 ######################################################################
