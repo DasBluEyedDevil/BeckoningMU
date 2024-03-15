@@ -142,10 +142,12 @@ DISCIPLINES = [
     "dominate",
     "fortitude",
     "obfuscate",
+    "oblivion",
     "potence",
     "presence",
     "protean",
-    "blood sorcery"
+    "blood sorcery",
+    "thin-blood alchemy"
 ]
 ADVANTAGES = [
     "beautiful",
@@ -230,13 +232,22 @@ BIO_GOOD_VALUES = {
     },
     "clan": {
         "values": [
+            "banu haqim",
             "brujah",
+            "caitiff",
             "gangrel",
+            "hecata",
+            "lasombra",
             "malkavian",
+            "the ministry",
             "nosferatu",
+            "ravnos",
+            "salubri",
             "toreador",
             "tremere",
-            "ventrue"
+            "tzimisce",
+            "ventrue",
+            "thin-blood"
         ],
         "check": lambda x: x["splat"] in "vampire",
         "check_message": "Clan is only available to vampires."
@@ -253,16 +264,23 @@ BIO_GOOD_VALUES = {
     },
     "predator": {
         "values": [
-            "allycat",
+            "alleycat",
             "bagger",
-            "bloodleech",
+            "blood leech",
             "cleaver",
             "consensualist",
+            "extortionist",
             "farmer",
+            "graverobber",
+            "grim reaper",
+            "montero",
+            "osiris",
+            "pursuer",
+            "roadside killer",
+            "sandman",
             "scenequeen",
-            "shepherd",
             "siren",
-            "whisperer"
+            "trapdoor"
         ],
         "check": lambda x: "vampire" in x["splat"],
         "check_message": "Predator is only available to vampires."
