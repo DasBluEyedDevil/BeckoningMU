@@ -92,7 +92,6 @@ class Room(ObjectParent, DefaultRoom):
         output += ANSIString("|Y[|n |w%s%s%s|n |Y]|n" %
                              (ooc, cg, namestring)).center(78, ANSIString("|R=|n"))
         output += "\n\n%s\n\n" % description
-
         # display the characters in the room.
         characters = [char for char in self.contents if char.has_account]
         if characters:
