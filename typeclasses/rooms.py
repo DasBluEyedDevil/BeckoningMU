@@ -78,11 +78,21 @@ class Room(ObjectParent, DefaultRoom):
                 ooc = ""
         except:
             ooc = ""
-
-        # build the return string
-        output += ANSIString("|Y[|n |w%s%s|n |Y]|n" %
-                             (ooc, namestring)).center(78, ANSIString("|R=|n"))
+        
+        # Addition for CG marking
+        try:
+            if self.db.cg:
+                cg = ANSIString("[CG] ")
+            else:
+                cg = ""
+        except:
+            cg = ""
+        
+        # build the return string, including both ooc and cg markers if they apply
+        output += ANSIString("|Y[|n |w%s%s%s|n |Y]|n" %
+                             (ooc, cg, namestring)).center(78, ANSIString("|R=|n"))
         output += "\n\n%s\n\n" % description
+
         # display the characters in the room.
         characters = [char for char in self.contents if char.has_account]
         if characters:
