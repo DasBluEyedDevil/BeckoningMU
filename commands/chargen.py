@@ -4,7 +4,7 @@ This module contains the commands for character generation.
 """
 
 from evennia.commands.default.muxcommand import MuxCommand
-from world.data import BIO, get_trait_list, SPLATS, PHYSICAL, MENTAL, SOCIAL, SKILLS, STATS
+from world.data import BIO, get_trait_list, SPLATS, PHYSICAL, MENTAL, SOCIAL, SKILLS, STATS, DISCIPLINES, ADVANTAGES, FLAWS, POOLS
 from evennia.utils.ansi import ANSIString
 from .utils import target, format
 from jobs.commands.commands import CmdJob
@@ -29,6 +29,9 @@ class cmdSplat(MuxCommand):
     help_category = "Character Generation"
 
     def func(self):
+        if not self.caller.location.db.cg:
+            self.caller.msg("This command can only be used in Character Generation areas.")
+            return
 
         target = self.caller
         splat = self.args.lower()
@@ -113,6 +116,9 @@ class cmdCg(MuxCommand):
     help_category = "character Generation"
 
     def func(self):
+        if not self.caller.location.db.cg:
+            self.caller.msg("This command can only be used in Character Generation areas.")
+            return
         # Unapproved characters can use this command.
         if self.caller.db.stats["approved"] == True and not self.caller.locks.check_lockstring(self.caller, "perm(Admin)"):
             self.caller.msg("You are already approved.")
@@ -1064,6 +1070,9 @@ class cmdSubmit(MuxCommand):
     def func(self):
         """Submit the application"""
         caller = self.caller
+        if not caller.location.db.cg:
+            caller.msg("This command can only be used in Character Generation areas.")
+            return
         args = self.args
 
         if caller.db.submitted:
