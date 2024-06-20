@@ -86,6 +86,11 @@ class CmdBBS(default_cmds.MuxCommand):
     
     def read_post(self, board, post_arg):
         "Read specific post."
+        # Check if post_arg is None or empty
+        if not post_arg:
+            self.caller.msg("No post specified.")
+            return
+    
         try:
             # Attempt to interpret post_arg as a sequence number first
             sequence_number = int(post_arg)  # Convert post_arg to an integer
@@ -97,9 +102,11 @@ class CmdBBS(default_cmds.MuxCommand):
             except Post.DoesNotExist:
                 self.caller.msg("Post not found by sequence number or title.")
                 return
+    
         # Format and send post
         output = format_post(self, post)
         self.caller.msg(output)
+
     
     def get_name(self, name):
         try:

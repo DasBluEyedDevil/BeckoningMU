@@ -444,7 +444,7 @@ class CmdMyJobs(MuxCommand):
 
     Usage:
       myjobs
-      myjobs/create <title>=<description>
+      myjobs/create <bucket> <title>=<description>
       myjobs/view <id>
       myjobs/list
 
@@ -459,7 +459,6 @@ class CmdMyJobs(MuxCommand):
     def jobs(self):
         account = self.caller.account
         return Job.objects.filter(created_by=account)
-
 
     def func(self):
         if not self.args and not self.switches:
@@ -481,7 +480,7 @@ class CmdMyJobs(MuxCommand):
             title, description = title_description.split("=", 1)
             bucket = Bucket.objects.get(name=bucket_name)
         except ValueError:
-            self.caller.msg(ANSIString(f"|wJob {job.id} created in bucket '{bucket.name}': {title}|n"))
+            self.caller.msg("Error: You must provide a bucket name, title, and description separated by '='.")
             return
         except Bucket.DoesNotExist:
             self.caller.msg(f"Bucket named '{bucket_name}' not found.")
@@ -495,15 +494,17 @@ class CmdMyJobs(MuxCommand):
             self.caller.msg("This command can only be used by a character with a valid account.")
             return
     
-        job = Job.objects.create(
-            title=title.strip(),
-            description=description.strip(),
-            created_by=account,  # Assigning the account to 'created_by'
-            creator=account,  # Also assigning the account to 'creator' if needed
-            bucket=bucket
-        )
-        self.caller.msg(f"Job {job.id} created in bucket '{bucket.name}': {title}")
-
+        try:
+            job = Job.objects.create(
+                title=title.strip(),
+                description=description.strip(),
+                created_by=account,  # Assigning the account to 'created_by'
+                creator=account,     # Also assigning the account to 'creator' if needed
+                bucket=bucket
+            )
+            self.caller.msg(f"Job {job.id} created in bucket '{bucket.name}': {title.strip()}")
+        except Exception as e:
+            self.caller.msg(f"An error occurred while creating the job: {e}")
 
     def view_my_job(self):
         try:
@@ -548,8 +549,6 @@ class CmdMyJobs(MuxCommand):
         output += "|R" + "=" * 78 + "|n\n"
     
         self.caller.msg(output)
-
-
 
     def list_my_jobs(self):
         if not isinstance(self.caller, ObjectDB):
