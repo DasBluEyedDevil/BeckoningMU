@@ -891,9 +891,9 @@ class CmdOOC(MuxCommand):
 
         # Format message based on prefix
         if speech.startswith(":"):
-            speech = " " + speech[1:]
+            speech = " " + speech[1:].lstrip()
         elif speech.startswith(";"):
-            speech = speech[1:]
+            speech = speech[1:].lstrip()
         else:
             speech = f' says, "{speech}"'
 
