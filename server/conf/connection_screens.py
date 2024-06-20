@@ -63,7 +63,7 @@ CONNECTION_SCREEN = """
     Enter |whelp|n for more info.
 
     Original Work by lcanady (github/lcanady)
-    Modifications by Devil
+    Modifications by Devil and erratic
     Powered By Evennia v{}""".format(
     utils.get_evennia_version("short")
 )
