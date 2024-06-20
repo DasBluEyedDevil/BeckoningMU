@@ -879,37 +879,35 @@ class CmdOOC(MuxCommand):
                        ANSIString(self.args.strip()))
             return
 
-        if not self.args:
+        speech = self.args.strip()
+
+        # Check for empty message
+        if speech in ["", ";", ":"]:
             caller.msg("OOC what?")
             return
-
-        speech = self.args.replace("ooc", "", 1).strip()
 
         # Calling the at_pre_say hook on the character
         speech = caller.at_pre_say(speech)
 
-        # If speech is empty, stop here
-        if not speech:
-            return
+        # Format message based on prefix
+        if speech.startswith(":"):
+            speech = " " + speech[1:]
+        elif speech.startswith(";"):
+            speech = speech[1:]
+        else:
+            speech = f' says, "{speech}"'
 
         for looker in caller.location.contents:
-            if speech[0] == ":":
-                speech = speech[1:]
-                speech = (self.caller.get_display_name(looker)) + \
-                    " " + speech
-            elif speech[0] == ";":
-                speech = speech[1:]
-                speech = (self.caller.get_display_name(looker)) + speech
+            # Add display name
+            ooc = self.caller.get_display_name(looker) + speech
+
+            # Add OOC style 
+            if self.caller.db.ooc_style:
+                ooc = caller.db.ooc_style + " " + ooc
             else:
-                speech = (self.caller.get_display_name(looker)) + \
-                    ' says, "' + speech + '"'
+                ooc = "|w<|rOOC|n|w>|n " + ooc
 
             # Send to all in current location.
-            if self.caller.db.ooc_style:
-                ooc = caller.db.ooc_style + " " + speech
-            else:
-                ooc = "|w<|rOOC|n|w>|n " + speech
-
             looker.msg(ooc)
 
 
