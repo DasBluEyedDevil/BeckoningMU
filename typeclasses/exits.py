@@ -40,8 +40,9 @@ class Exit(ObjectParent, DefaultExit):
 
     def get_display_name(self, looker=None, **kwargs):
 
-        # list the first aloias next to the full name of the exit.
+        # list the first alias next to the full name of the exit.
         if self.aliases.all():
-            return ANSIString(f"<|w{self.aliases.all()[0].upper()}|n>").ljust(5) + f"{self.name}"
+            return ANSIString(f"<|w{self.aliases.all()[0].upper()}|n>").ljust(5).raw() + self.name
         else:
             return super().get_display_name(looker, **kwargs)
+
