@@ -1,11 +1,18 @@
 from evennia.commands.default.muxcommand import MuxCommand
+from evennia.commands.cmdset import CmdSet
 from world.data import get_trait_list
 import random
 from evennia.utils.ansi import ANSIString
 from jobs.commands.commands import CmdJob
 
 
-class dice(MuxCommand):
+class DiceCmdSet(CmdSet):
+    def at_cmdset_creation(self):
+        super().at_cmdset_creation()
+        self.add(CmdDice())
+
+
+class CmdDice(MuxCommand):
     """
     This is the dice roller command. It takes a dice pool and rolls that many dice.
 
@@ -57,7 +64,7 @@ class dice(MuxCommand):
                 output.append("|y%s|n " % roll)
 
         if (tens / 2) >= 1:
-            crits = int((tens/2) * 2)
+            crits = int((tens / 2) * 2)
 
         output.sort(key=lambda x: int(ANSIString((x))))
         s_list = "".join(output)
@@ -72,7 +79,6 @@ class dice(MuxCommand):
         return res
 
     def func(self):
-
         if not self.caller.db.stats:
             self.caller.msg("You don't have any stats yet.")
             return
@@ -89,7 +95,6 @@ class dice(MuxCommand):
             return
 
         if "job" in self.switches:
-
             try:
                 job, roll = self.args.split(" ", 1)
             except ValueError:
@@ -100,15 +105,19 @@ class dice(MuxCommand):
 
         # Anywhere in the string, when there's a plus sign with a space on each side, replace it with a plus
         # This is to allow for people to type in "+1 +2 +3" or "+1+2+3" and have it work the same way.
-        args = roll.replace(
-            "+", " +").replace(" + ", " +").replace("-", " -").replace(" - ", " -").replace("  ", " ").split(" ")
+        args = (
+            roll.replace("+", " +")
+            .replace(" + ", " +")
+            .replace("-", " -")
+            .replace(" - ", " -")
+            .replace("  ", " ")
+            .split(" ")
+        )
         dice = []
         dice_pool = 0
 
         for arg in args:
-
             if arg[0] == "+" or arg[0] == "-":
-
                 if arg[1:].isdigit():
                     if arg[0] == "+":
                         dice_pool += int(arg[1:])
@@ -122,9 +131,9 @@ class dice(MuxCommand):
                 if res:
                     # Try to add their dice in the trait to the dice pool
                     try:
-
-                        value = self.caller.db.stats[res.get(
-                            'category')][res.get('trait')]
+                        value = self.caller.db.stats[res.get("category")][
+                            res.get("trait")
+                        ]
 
                         # if there's a temp value, add it to the dice pool
                         try:
@@ -137,15 +146,14 @@ class dice(MuxCommand):
                         else:
                             dice_pool += max(value, temp)
                         # Append the dice list with the actual name of the trait.
-                        dice.append(arg[0] + res.get('trait'))
+                        dice.append(arg[0] + res.get("trait"))
                     except KeyError:
                         # if tehre's no dice behind it, still add the trait to the output.
-                        dice.append(arg[0] + res.get('trait'))
+                        dice.append(arg[0] + res.get("trait"))
 
                 else:
                     pass
             else:
-
                 if arg.isdigit():
                     dice_pool += int(arg)
                     dice.append(arg)
@@ -154,15 +162,18 @@ class dice(MuxCommand):
                     if res:
                         # Try to add their dice in the trait to the dice pool
                         try:
-
-                            value = self.caller.db.stats[res.get(
-                                'category')][res.get('trait')]
+                            value = self.caller.db.stats[res.get("category")][
+                                res.get("trait")
+                            ]
 
                             # if there's a temp value, add it to the dice pool
                             temp = 0
                             try:
-                                temp = self.caller.db.stats["temp"].get(
-                                    res.get("trait")) or 0
+                                temp = (
+                                    self.caller.db.stats["temp"].get(
+                                        res.get("trait"))
+                                    or 0
+                                )
                             except KeyError:
                                 temp = 0
 
@@ -175,10 +186,10 @@ class dice(MuxCommand):
                                     dice_pool += value
 
                             # Append the dice list with the actual name of the trait.
-                            dice.append(res.get('trait'))
+                            dice.append(res.get("trait"))
                         except KeyError:
                             # if tehre's no dice behind it, still add the trait to the output.
-                            dice.append(res.get('trait'))
+                            dice.append(res.get("trait"))
 
         mod_dice_pool = dice_pool - hunger
         if mod_dice_pool <= 0:
@@ -207,7 +218,6 @@ class dice(MuxCommand):
         dice = " ".join(dice).replace(" +", " + ").replace(" -", " - ")
 
         if "job" in self.switches:
-
             if hunger:
                 msg = f"|wROLL>|n |c{self.caller.get_display_name()}|n rolls |w{dice}|n -> {successes} ({regular_dice.get('s_list').strip()}) |w<|n{hunger_dice.get('s_list').strip()}|w>|n"
             else:

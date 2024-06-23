@@ -1,9 +1,16 @@
 from evennia.commands.default.muxcommand import MuxCommand
+from evennia.commands.cmdset import CmdSet
 from datetime import datetime
 from evennia.utils.ansi import ANSIString
 
+class NotesCmdSet(CmdSet):
+    def at_cmdset_creation(self):
+        super().at_cmdset_creation()
+        self.add(CmdNotes())
+        self.add(CmdNoteProve())
+        self.add(CmdNoteApprove())
 
-class cmdNotes(MuxCommand):
+class CmdNotes(MuxCommand):
     """
  READ NOTES
    +notes                      - see all your notes
