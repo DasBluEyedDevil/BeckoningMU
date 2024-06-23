@@ -67,6 +67,10 @@ class Room(ObjectParent, DefaultRoom):
         },
         "exit_section_header": {},
         "exit_section_contents": {},
+        "footer": {
+            "width": output_width,
+            "fill_char": ANSIString("|R=|n"),
+        },
     }
 
     def get_display_name(self, looker, **kwargs):
@@ -110,6 +114,13 @@ class Room(ObjectParent, DefaultRoom):
         """
         return [exit for exit in self.contents if exit.destination]
 
+    def get_display_footer(self, looker, **kwargs):
+        """
+        Get the 'footer' of the room description. Called by `return_appearance`.
+        """
+        styles = self.styles["footer"]
+        return styles["fill_char"] * styles["width"] 
+
     def format_header(self, looker, header, **kwargs):
         """ 
         Applies extra formatting to the rooms display header
@@ -127,9 +138,9 @@ class Room(ObjectParent, DefaultRoom):
         Applies extra formatting to the rooms title string.
         The title includes the name, displayed tags, and extra name info such as dbrefs for builders
         """
-        tags = "".join(f"[{self.display_tag_mapping[tag] or tag}]" for tag in tags)
+        tags = "".join(f"|w[{self.display_tag_mapping[tag] or tag}]|n" for tag in tags)
         tags = f" {tags}" if tags else ""
-        title = f" {tags}{name}{extra_name_info} "
+        title = f"|Y[|n {tags}|w{name}|w{extra_name_info} |Y]|n"
         styles = self.styles["title"]
         return ANSIString(title).center(styles["width"], styles["fill_char"])
 
