@@ -49,7 +49,7 @@ class Exit(ObjectParent, DefaultExit):
         # list the first alias next to the full name of the exit.
         if aliases:
             alias = aliases[0]
-            alias_link = make_link(alias.upper(), alias)
+            alias_link = make_link(alias, alias.upper())
             return f"<|w{alias_link}|n>  {name_link}"
         else:
             return name_link
