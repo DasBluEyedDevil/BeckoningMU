@@ -29,8 +29,12 @@ class cmdSplat(MuxCommand):
     help_category = "Character Generation"
 
     def func(self):
-        if not self.caller.location.db.cg:
-            self.caller.msg("This command can only be used in Character Generation areas.")
+        if not self.caller.locks.check_lockstring(
+            self.caller, "perm(Admin)"
+        ) and not self.caller.location.tags.has("chargen"):
+            self.caller.msg(
+                "This command can only be used in Character Generation areas."
+            )
             return
 
         target = self.caller
@@ -110,20 +114,23 @@ class cmdCg(MuxCommand):
     See also:  +splat +sheet
 
     """
+
     key = "+stats"
     aliases = ["stat"]
     locks = "cmd:all()"
     help_category = "character Generation"
 
     def func(self):
-        if not self.caller.location.db.cg:
-            self.caller.msg("This command can only be used in Character Generation areas.")
-            return
-        # Unapproved characters can use this command.
-        if self.caller.db.stats["approved"] == True and not self.caller.locks.check_lockstring(self.caller, "perm(Admin)"):
-            self.caller.msg("You are already approved.")
-            return
-
+        if not self.caller.locks.check_lockstring(self.caller, "perm(Admin)"):
+            if not self.caller.location.tags.has("chargen"):
+                self.caller.msg(
+                    "This command can only be used in Character Generation areas."
+                )
+                return
+            # Unapproved characters can use this command.
+            if self.caller.db.stats["approved"] == True:
+                self.caller.msg("You are already approved.")
+                return
         try:
             # if the command was +stats/wipe me=confirm, then wipe the stats.
             if self.switches[0] == "wipe" and self.rhs == "confirm":
@@ -1068,7 +1075,7 @@ class cmdSubmit(MuxCommand):
     def func(self):
         """Submit the application"""
         caller = self.caller
-        if not caller.location.db.cg:
+        if not caller.location.tags.has("chargen"):
             caller.msg("This command can only be used in Character Generation areas.")
             return
         args = self.args
