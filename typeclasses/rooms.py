@@ -10,6 +10,11 @@ from evennia.objects.objects import DefaultRoom
 from evennia.utils.ansi import ANSIString
 from evennia.utils.evtable import EvTable
 from .objects import ObjectParent
+from django.conf import settings
+
+
+def _get_client_width(session):
+    return session.get_client_size()[0] or settings.DEFAULT_CLIENT_WIDTH
 
 
 class Room(ObjectParent, DefaultRoom):
@@ -23,18 +28,15 @@ class Room(ObjectParent, DefaultRoom):
     properties and methods available on all Objects.
     """
 
-    output_width = 80
     exits_per_row = AttributeProperty(3)
 
     # Styling for EvTables in the room display output
     styles = {
         "title": {
-            "width": output_width,
             "fill_char": ANSIString("|R=|n"),
         },
         # Common Section Styles
         "section_table": {
-            "width": output_width,
             "header_line_char": ANSIString("|R-|n"),
             "border": "header",
             "pad_left": 1,
@@ -50,16 +52,11 @@ class Room(ObjectParent, DefaultRoom):
         "character_section_contents": {
             "pad_top": 1,
         },
-        "character_shortdesc_column": {
-            "width": 55,
-        },
+        "character_shortdesc_column": {},
         "character_idle_time_column": {
-            "width": 5,
             "align": "r",
         },
-        "character_name_column": {
-            "width": 20,
-        },
+        "character_name_column": {},
         # Exit Section Styles
         "exit_section_table": {
             "pad_top": 0,
@@ -68,37 +65,36 @@ class Room(ObjectParent, DefaultRoom):
         "exit_section_header": {},
         "exit_section_contents": {},
         "footer": {
-            "width": output_width,
             "fill_char": ANSIString("|R=|n"),
         },
     }
 
-    def get_display_name(self, looker, **kwargs):
+    def get_display_name(self, looker, session, **kwargs):
         """
         Displays the name of the object in a viewer-aware manner.
         """
         return super().get_display_name(looker, **kwargs)
 
-    def get_extra_display_name_info(self, looker, **kwargs):
+    def get_extra_display_name_info(self, looker, session, **kwargs):
         """
         Adds any extra display information to the object's name. By default this is is the
         object's dbref in parentheses, if the looker has permission to see it.
         """
         return super().get_extra_display_name_info(looker, **kwargs)
 
-    def get_display_tags(self, looker, **kwargs):
+    def get_display_tags(self, looker, session, **kwargs):
         """
         Returns a list of textual tags to add to the rooms title string.
         """
         return (tag for tag in self.display_tag_mapping.keys() if self.tags.has(tag))
 
-    def get_display_desc(self, looker, **kwargs):
+    def get_display_desc(self, looker, session, **kwargs):
         """
         Returns the displayed description of the room
         """
         return self.db.desc or "You see nothing special."
 
-    def get_display_characters(self, looker, **kwargs):
+    def get_display_characters(self, looker, session, **kwargs):
         """
         Returns a list of DefaultCharacters that should be displayed in the room for the given viewer.
         """
@@ -108,21 +104,22 @@ class Room(ObjectParent, DefaultRoom):
             if char.has_account and char.access(looker, "view")
         ]
 
-    def get_display_exits(self, looker, **kwargs):
+    def get_display_exits(self, looker, session, **kwargs):
         """
         Returns a list of DefaultExits that should be displayed in the room for the given viewer.
         """
         return [exit for exit in self.contents if exit.destination]
 
-    def get_display_footer(self, looker, **kwargs):
+    def get_display_footer(self, looker, session, **kwargs):
         """
         Get the 'footer' of the room description. Called by `return_appearance`.
         """
         styles = self.styles["footer"]
-        return styles["fill_char"] * styles["width"] 
+        width = _get_client_width(session)
+        return styles["fill_char"] * width
 
-    def format_header(self, looker, header, **kwargs):
-        """ 
+    def format_header(self, looker, session, header, **kwargs):
+        """
         Applies extra formatting to the rooms display header
         """
         return header
@@ -133,34 +130,38 @@ class Room(ObjectParent, DefaultRoom):
     # The values are the text to display when the tag is present on the room
     display_tag_mapping = {"ooc": "OOC Area", "chargen": "CG"}
 
-    def format_title(self, looker, name, extra_name_info, tags, **kwargs):
+    def format_title(self, looker, session, name, extra_name_info, tags, **kwargs):
         """
         Applies extra formatting to the rooms title string.
         The title includes the name, displayed tags, and extra name info such as dbrefs for builders
         """
-        tags = "".join(f"|w[{self.display_tag_mapping[tag] or tag}]|n" for tag in tags)
+        tags = "".join(
+            f"|w[{self.display_tag_mapping[tag] or tag}]|n" for tag in tags)
         tags = f"{tags} " if tags else ""
         title = f"|Y[|n {tags}|w{name}|w{extra_name_info} |Y]|n"
         styles = self.styles["title"]
-        return ANSIString(title).center(styles["width"], styles["fill_char"])
+        width = _get_client_width(session)
+        return ANSIString(title).center(width, styles["fill_char"])
 
-    def format_desc(self, looker, desc, **kwargs):
-        """ 
+    def format_desc(self, looker, session, desc, **kwargs):
+        """
         Applies extra formatting to the rooms display description
         """
         return desc
 
-    def format_exit_section(self, looker, exits, **kwargs):
+    def format_exit_section(self, looker, session, exits, **kwargs):
         """
         Returns how the exits of a room should be displayed when viewed from inside the room.
         """
         if not exits:
             return ""
+        width = _get_client_width(session)
         table = EvTable(
+            width=width,
             **{
                 **self.styles["section_table"],
                 **self.styles["exit_section_table"],
-            }
+            },
         )
         table.add_header(
             " |wExits|n ",
@@ -175,7 +176,7 @@ class Room(ObjectParent, DefaultRoom):
         ]
         for i in range(0, len(exits), self.exits_per_row):
             table.add_row(
-                *exits[i : i + self.exits_per_row],
+                *exits[i: i + self.exits_per_row],
                 **{
                     **self.styles["section_contents"],
                     **self.styles["exit_section_contents"],
@@ -183,13 +184,15 @@ class Room(ObjectParent, DefaultRoom):
             )
         return ANSIString("\n").join(table.get())
 
-    def format_character_section(self, looker, characters, **kwargs):
+    def format_character_section(self, looker, session, characters, **kwargs):
         """
         Returns how the characters inside a room should be displayed when viewed from inside the room.
         """
         if not characters:
             return ""
+        width = _get_client_width(session)
         table = EvTable(
+            width=width,
             **{
                 **self.styles["section_table"],
                 **self.styles["character_section_table"],
@@ -215,43 +218,59 @@ class Room(ObjectParent, DefaultRoom):
                 },
             )
         table.reformat_column(0, **self.styles["character_shortdesc_column"])
-        table.reformat_column(1, **self.styles["character_name_column"])
-        table.reformat_column(2, **self.styles["character_idle_time_column"])
+        table.reformat_column(
+            1, width=int(width * 0.25), **self.styles["character_name_column"]
+        )
+        table.reformat_column(
+            2, width=int(width * 0.0625), **self.styles["character_idle_time_column"]
+        )
         return ANSIString("\n").join(table.get())
 
-    def format_footer(self, looker, footer, **kwargs):
+    def format_footer(self, looker, session, footer, **kwargs):
         """
         Applies extra formatting to the rooms display footer
         """
         return footer
 
-    def return_appearance(self, looker, **kwargs):
+    def return_appearance(self, looker, session, **kwargs):
         """
         This is the hook for returning the appearance of the room.
         """
+        print(session)
         header = self.format_header(
-            looker, self.get_display_header(looker, **kwargs), **kwargs
+            looker, session, self.get_display_header(looker, **kwargs), **kwargs
         )
 
-        name = self.get_display_name(looker, **kwargs)
+        name = self.get_display_name(looker, session, **kwargs)
 
-        extra_name_info = self.get_extra_display_name_info(looker, **kwargs)
+        extra_name_info = self.get_extra_display_name_info(
+            looker, session, **kwargs)
 
-        tags = self.get_display_tags(looker, **kwargs)
+        tags = self.get_display_tags(looker, session, **kwargs)
 
-        title = self.format_title(looker, name, extra_name_info, tags, **kwargs)
+        title = self.format_title(
+            looker, session, name, extra_name_info, tags, **kwargs
+        )
 
-        desc = self.format_desc(looker, self.get_display_desc(looker, **kwargs))
+        desc = self.format_desc(
+            looker, session, self.get_display_desc(looker, session, **kwargs)
+        )
 
         character_section = self.format_character_section(
-            looker, self.get_display_characters(looker, **kwargs), **kwargs
+            looker,
+            session,
+            self.get_display_characters(looker, session, **kwargs),
+            **kwargs,
         )
         exit_section = self.format_exit_section(
-            looker, self.get_display_exits(looker, **kwargs), **kwargs
+            looker, session, self.get_display_exits(looker, session, **kwargs), **kwargs
         )
 
         footer = self.format_footer(
-            looker, self.get_display_footer(looker, **kwargs), **kwargs
+            looker,
+            session,
+            self.get_display_footer(looker, session, **kwargs),
+            **kwargs,
         )
 
         return ANSIString("\n\n").join(
