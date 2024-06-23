@@ -139,7 +139,7 @@ class Room(ObjectParent, DefaultRoom):
         The title includes the name, displayed tags, and extra name info such as dbrefs for builders
         """
         tags = "".join(f"|w[{self.display_tag_mapping[tag] or tag}]|n" for tag in tags)
-        tags = f" {tags}" if tags else ""
+        tags = f"{tags} " if tags else ""
         title = f"|Y[|n {tags}|w{name}|w{extra_name_info} |Y]|n"
         styles = self.styles["title"]
         return ANSIString(title).center(styles["width"], styles["fill_char"])
