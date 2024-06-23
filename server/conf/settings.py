@@ -47,6 +47,17 @@ COLOR_ANSI_XTERM256_BRIGHT_BG_EXTRA_MAP = color_markups.MUX_COLOR_ANSI_XTERM256_
 
 TELNET_PORTS = [6666]
 
+# Optional channel (same form as CHANNEL_MUDINFO) that will receive connection
+# messages like ("<account> has (dis)connected"). While the MudInfo channel
+# will also receieve this info, this channel is meant for non-staffers. If
+# None, this information will only be logged.
+CHANNEL_CONNECTINFO = {
+    "key": "ConnInfo",
+    "aliases": "",
+    "desc": "Player Connect/Disconnect Log",
+    "locks": "control:perm(Developer);listen:true();send:false()",
+}
+
 OPTIONS_ACCOUNT_DEFAULT = {
     "border_color": ("Headers, footers, table borders, etc.", "Color", "R"),
     "header_star_color": ("* inside Header lines.", "Color", "n"),
