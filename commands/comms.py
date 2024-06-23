@@ -6,38 +6,37 @@ from evennia.utils.ansi import ANSIString
 class CommsCmdSet(CmdSet):
     def at_cmdset_creation(self):
         super().at_cmdset_creation()
-        self.add(CmdOOC())
+        self.add(CmdOOCSay())
 
 
-class CmdOOC(MuxCommand):
+class CmdOOCSay(MuxCommand):
     """
-    Send an OOC message.
+    Say something to the room while Out-of-Character (OOC).
 
     Usage:
-      ooc <message>
-      ooc/style <OOC style>
+      osay <message>
+      osay/style <OOC style>
 
     Switches:
         /style - sets your OOC style to the one specified.
 
     """
 
-    key = "ooc"
+    key = "osay"
+    # This should probably go into Comms category, but "say" is currently in General
     help_category = "General"
     locks = "cmd:all()"
 
     def func(self):
-        "Implement function"
-
         caller = self.caller
 
         if "style" in self.switches:
             if not self.args:
                 caller.msg("OOC style removed.")
-                self.caller.db.ooc_style = ""
+                self.caller.db.osay_style = ""
                 return
 
-            self.caller.db.ooc_style = self.args.strip()
+            self.caller.db.osay_style = self.args.strip()
             caller.msg("OOC style set to '%s'." %
                        ANSIString(self.args.strip()))
             return
@@ -46,7 +45,7 @@ class CmdOOC(MuxCommand):
 
         # Check for empty message
         if speech in ["", ";", ":"]:
-            caller.msg("OOC what?")
+            caller.msg("Say what?")
             return
 
         # Calling the at_pre_say hook on the character
@@ -66,7 +65,7 @@ class CmdOOC(MuxCommand):
 
             # Add OOC style
             if self.caller.db.ooc_style:
-                ooc = caller.db.ooc_style + " " + ooc
+                ooc = caller.db.osay_style + " " + ooc
             else:
                 ooc = "|w<|rOOC|n|w>|n " + ooc
 
