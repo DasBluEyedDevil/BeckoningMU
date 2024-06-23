@@ -5,8 +5,10 @@ Rooms are simple containers that has no location of their own.
 
 """
 
+from evennia import AttributeProperty
 from evennia.objects.objects import DefaultRoom
 from evennia.utils.ansi import ANSIString
+from evennia.utils.evtable import EvTable
 from .objects import ObjectParent
 
 
@@ -21,144 +23,239 @@ class Room(ObjectParent, DefaultRoom):
     properties and methods available on all Objects.
     """
 
+    output_width = 80
+    exits_per_row = AttributeProperty(3)
+
+    # Styling for EvTables in the room display output
+    styles = {
+        "title": {
+            "width": output_width,
+            "fill_char": ANSIString("|R=|n"),
+        },
+        # Common Section Styles
+        "section_table": {
+            "width": output_width,
+            "header_line_char": ANSIString("|R-|n"),
+            "border": "header",
+            "pad_left": 1,
+            "pad_right": 1,
+        },
+        "section_header": {},
+        "section_contents": {},
+        # Character Section Styles
+        "character_section_table": {
+            "valign": "b",
+        },
+        "character_section_header": {},
+        "character_section_contents": {
+            "pad_top": 1,
+        },
+        "character_shortdesc_column": {
+            "width": 55,
+        },
+        "character_idle_time_column": {
+            "width": 5,
+            "align": "r",
+        },
+        "character_name_column": {
+            "width": 20,
+        },
+        # Exit Section Styles
+        "exit_section_table": {
+            "pad_top": 0,
+            "pad_bottom": 0,
+        },
+        "exit_section_header": {},
+        "exit_section_contents": {},
+        "footer": {
+            "width": output_width,
+            "fill_char": ANSIString("|R=|n"),
+        },
+    }
+
+    def get_display_name(self, looker, **kwargs):
+        """
+        Displays the name of the object in a viewer-aware manner.
+        """
+        return super().get_display_name(looker, **kwargs)
+
+    def get_extra_display_name_info(self, looker, **kwargs):
+        """
+        Adds any extra display information to the object's name. By default this is is the
+        object's dbref in parentheses, if the looker has permission to see it.
+        """
+        return super().get_extra_display_name_info(looker, **kwargs)
+
+    def get_display_tags(self, looker, **kwargs):
+        """
+        Returns a list of textual tags to add to the rooms title string.
+        """
+        return (tag for tag in self.display_tag_mapping.keys() if self.tags.has(tag))
+
+    def get_display_desc(self, looker, **kwargs):
+        """
+        Returns the displayed description of the room
+        """
+        return self.db.desc or "You see nothing special."
+
+    def get_display_characters(self, looker, **kwargs):
+        """
+        Returns a list of DefaultCharacters that should be displayed in the room for the given viewer.
+        """
+        return [
+            char
+            for char in self.contents
+            if char.has_account and char.access(looker, "view")
+        ]
+
+    def get_display_exits(self, looker, **kwargs):
+        """
+        Returns a list of DefaultExits that should be displayed in the room for the given viewer.
+        """
+        return [exit for exit in self.contents if exit.destination]
+
+    def get_display_footer(self, looker, **kwargs):
+        """
+        Get the 'footer' of the room description. Called by `return_appearance`.
+        """
+        styles = self.styles["footer"]
+        return styles["fill_char"] * styles["width"] 
+
+    def format_header(self, looker, header, **kwargs):
+        """ 
+        Applies extra formatting to the rooms display header
+        """
+        return header
+
+    # These are tags that are displayed next to the name of the room
+    #
+    # The keys are the names of the tags
+    # The values are the text to display when the tag is present on the room
+    display_tag_mapping = {"ooc": "OOC Area", "chargen": "CG"}
+
+    def format_title(self, looker, name, extra_name_info, tags, **kwargs):
+        """
+        Applies extra formatting to the rooms title string.
+        The title includes the name, displayed tags, and extra name info such as dbrefs for builders
+        """
+        tags = "".join(f"|w[{self.display_tag_mapping[tag] or tag}]|n" for tag in tags)
+        tags = f" {tags}" if tags else ""
+        title = f"|Y[|n {tags}|w{name}|w{extra_name_info} |Y]|n"
+        styles = self.styles["title"]
+        return ANSIString(title).center(styles["width"], styles["fill_char"])
+
+    def format_desc(self, looker, desc, **kwargs):
+        """ 
+        Applies extra formatting to the rooms display description
+        """
+        return desc
+
+    def format_exit_section(self, looker, exits, **kwargs):
+        """
+        Returns how the exits of a room should be displayed when viewed from inside the room.
+        """
+        if not exits:
+            return ""
+        table = EvTable(
+            **{
+                **self.styles["section_table"],
+                **self.styles["exit_section_table"],
+            }
+        )
+        table.add_header(
+            " |wExits|n ",
+            **{
+                **self.styles["section_header"],
+                **self.styles["exit_section_header"],
+            },
+        )
+        exits = [
+            exit.get_display_name(looker)
+            for exit in sorted(exits, key=lambda e: e.name)
+        ]
+        for i in range(0, len(exits), self.exits_per_row):
+            table.add_row(
+                *exits[i : i + self.exits_per_row],
+                **{
+                    **self.styles["section_contents"],
+                    **self.styles["exit_section_contents"],
+                },
+            )
+        return ANSIString("\n").join(table.get())
+
+    def format_character_section(self, looker, characters, **kwargs):
+        """
+        Returns how the characters inside a room should be displayed when viewed from inside the room.
+        """
+        if not characters:
+            return ""
+        table = EvTable(
+            **{
+                **self.styles["section_table"],
+                **self.styles["character_section_table"],
+            },
+        )
+        table.add_header(
+            "|w Characters |n",
+            **{
+                **self.styles["section_header"],
+                **self.styles["character_section_header"],
+            },
+        )
+        for char in characters:
+            name = char.get_display_name(looker, **kwargs)
+            idle_time = char.format_idle_time(looker, **kwargs)
+            shortdesc = char.get_display_shortdesc(looker, **kwargs)
+
+            table.add_row(
+                *[shortdesc, name, idle_time],
+                **{
+                    **self.styles["section_contents"],
+                    **self.styles["character_section_contents"],
+                },
+            )
+        table.reformat_column(0, **self.styles["character_shortdesc_column"])
+        table.reformat_column(1, **self.styles["character_name_column"])
+        table.reformat_column(2, **self.styles["character_idle_time_column"])
+        return ANSIString("\n").join(table.get())
+
+    def format_footer(self, looker, footer, **kwargs):
+        """
+        Applies extra formatting to the rooms display footer
+        """
+        return footer
+
     def return_appearance(self, looker, **kwargs):
         """
         This is the hook for returning the appearance of the room.
         """
+        header = self.format_header(
+            looker, self.get_display_header(looker, **kwargs), **kwargs
+        )
 
-        def format_time(time_in_seconds):
-            """
-            This function takes a time in seconds and returns a string that represents
-            that time in a more human-friendly format.
-            """
-            minutes, seconds = divmod(time_in_seconds, 60)
-            hours, minutes = divmod(minutes, 60)
-            days, hours = divmod(hours, 24)
-            # round seconds
-            seconds = int(round(seconds, 0))
-            minutes = int(round(minutes, 0))
-            hours = int(round(hours, 0))
-            days = int(round(days, 0))
+        name = self.get_display_name(looker, **kwargs)
 
-            time_str = ""
-            if days > 0:
-                time_str = f"|x{days}d|n"
-                return time_str.strip()
-            elif hours > 0:
-                time_str = f"|x{hours}h|n"
-                return time_str.strip()
-            elif minutes > 0:
-                if minutes > 10 and minutes < 15:
-                    time_str = f"|G{minutes}m|n"
-                elif minutes > 15 and minutes < 20:
-                    time_str = f"|y{minutes}m|n"
-                elif minutes > 20 and minutes < 30:
-                    time_str = f"|r{minutes}m|n"
-                elif minutes > 30 and minutes:
-                    time_str = f"|r{minutes}m|n"
-                else:
-                    time_str = f"|g{minutes}m|n"
-                return time_str.strip()
-            elif seconds > 0:
-                time_str += f"|g{seconds}s|n"
-                return time_str.strip()
+        extra_name_info = self.get_extra_display_name_info(looker, **kwargs)
 
-        # Get the description, build the string
-        description = "|-" + (self.db.desc or "You see nothing special.")
+        tags = self.get_display_tags(looker, **kwargs)
 
-        # build the namestring. This is Name(#id) for admins
-        # and Name for all others.
-        output = ""
-        namestring = self.get_display_name(looker)
+        title = self.format_title(looker, name, extra_name_info, tags, **kwargs)
 
-        try:
-            if not self.db.ic:
-                ooc = ANSIString("[OOC Area] ")
-            else:
-                ooc = ""
-        except:
-            ooc = ""
-        
-        # Addition for CG marking
-        try:
-            if self.db.cg:
-                cg = ANSIString("[CG] ")
-            else:
-                cg = ""
-        except:
-            cg = ""
-        
-        # build the return string, including both ooc and cg markers if they apply
-        output += ANSIString("|Y[|n |w%s%s%s|n |Y]|n" %
-                             (ooc, cg, namestring)).center(78, ANSIString("|R=|n"))
-        output += "\n\n%s\n\n" % description
-        # display the characters in the room.
-        characters = [char for char in self.contents if char.has_account]
-        if characters:
-            output += ANSIString("|w Characters |n").center(78,
-                                                            ANSIString("|R-|n"))
-            for char in characters:
+        desc = self.format_desc(looker, self.get_display_desc(looker, **kwargs))
 
-                # if the looker can see the character, show the name, idle time and a short_desctiption
-                if char.access(looker, "view"):
-                    # if the listed char is admin or greater, show a star '* ' before the name
+        character_section = self.format_character_section(
+            looker, self.get_display_characters(looker, **kwargs), **kwargs
+        )
+        exit_section = self.format_exit_section(
+            looker, self.get_display_exits(looker, **kwargs), **kwargs
+        )
 
-                    if char.locks.check_lockstring(char, "perm(Admin)"):
-                        charstring = ANSIString(" |c*|n  %s|n" %
-                                                char.get_display_name(looker)).ljust(20)
-                    else:
-                        charstring = ANSIString("    %s|n" %
-                                                char.get_display_name(looker)).ljust(20)
+        footer = self.format_footer(
+            looker, self.get_display_footer(looker, **kwargs), **kwargs
+        )
 
-                    # show the idle time.  If the character is the looker, show 0s.
-                    if char == looker:
-                        charstring += ANSIString("  |g0s|n").rjust(5)
-                    else:
-                        charstring += ANSIString("%s" %
-                                                 format_time(char.idle_time)).rjust(5)
-
-                    # if the character has a short_description, show it. ekse show how to set it.
-                    if char.db.shortdesc:
-                        charstring += ANSIString("  %s" %
-                                                 char.db.shortdesc).ljust(55)
-                    else:
-                        charstring += ANSIString(
-                            "|x  Use '+short <description>' to set this.|n")
-
-                    output += "\n%s" % charstring
-
-        # display the exits  in the room if there are any
-        exits = [
-            exit.get_display_name(looker) for exit in self.contents if exit.destination and not exit.db.exit_location]
-        exits = sorted(exits, key=lambda x: x)
-
-        # exits = list(map(lambda x: x.get_display_name(looker), exits)).sort()
-
-        locations = [
-            exit.get_display_name(looker) for exit in self.contents if exit.db.exit_location == True and exit.destination]
-        locations = sorted(locations, key=lambda x: x)
-
-        if locations:
-            output += "\n" + \
-                ANSIString(" |wLocations|n ").center(78, ANSIString("|R-|n"))
-            count = 0
-            for location in locations:
-                if count % 3 == 0:
-                    output += "\n "
-                count += 1
-
-                output += ANSIString("%s  " % location).ljust(25)
-        if exits:
-            output += "\n" + \
-                ANSIString(" |wExits|n ").center(78, ANSIString("|R-|n"))
-            count = 0
-            for exit in exits:
-                if count % 3 == 0:
-                    output += "\n "
-                count += 1
-
-                output += ANSIString("%s  " % exit).ljust(25)
-            output += "\n" + ANSIString("|R=|n" * 78)
-        else:
-            output += "\n" + ANSIString("|R=|n" * 78)
-        return output
+        return ANSIString("\n\n").join(
+            s
+            for s in [header, title, desc, character_section, exit_section, footer]
+            if s
+        )
