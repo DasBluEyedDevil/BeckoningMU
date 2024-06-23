@@ -46,6 +46,7 @@ COLOR_XTERM256_EXTRA_GBG = color_markups.MUX_COLOR_XTERM256_EXTRA_GBG
 COLOR_ANSI_XTERM256_BRIGHT_BG_EXTRA_MAP = color_markups.MUX_COLOR_ANSI_XTERM256_BRIGHT_BG_EXTRA_MAP
 
 TELNET_PORTS = [6666]
+CLIENT_DEFAULT_WIDTH = 80
 
 # Optional channel (same form as CHANNEL_MUDINFO) that will receive connection
 # messages like ("<account> has (dis)connected"). While the MudInfo channel
