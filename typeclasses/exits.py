@@ -39,10 +39,18 @@ class Exit(ObjectParent, DefaultExit):
     """
 
     def get_display_name(self, looker=None, **kwargs):
+        # helper to create a clickable link
+        def make_link(cmd, text):
+            return f"|lc{cmd}|lt{text}|le"
 
+        # create clickable link from name
+        name_link = make_link(self.name, self.name)
+        aliases = self.aliases.all()
         # list the first alias next to the full name of the exit.
-        if self.aliases.all():
-            return ANSIString(f"<|w{self.aliases.all()[0].upper()}|n>").ljust(5).raw() + self.name
+        if aliases:
+            alias = aliases[0]
+            alias_link = make_link(alias, alias)
+            return f"<|w{alias_link}|n>  {name_link}"
         else:
-            return super().get_display_name(looker, **kwargs)
+            return name_link
 
