@@ -75,7 +75,10 @@ class Character(ObjectParent, DefaultCharacter):
         # If the character is the looker, show 0s.
         if self == looker:
             return "|g0s|n"
-        minutes, seconds = divmod(time_in_seconds, 60)
+        time = self.idle_time or self.connection_time
+        if time is None:
+            return "|g0s|n"
+        minutes, seconds = divmod(time, 60)
         hours, minutes = divmod(minutes, 60)
         days, hours = divmod(hours, 24)
 
