@@ -15,14 +15,17 @@ own cmdsets by inheriting from them or directly from `evennia.CmdSet`.
 """
 
 from evennia import default_cmds
-from commands.chargen import cmdCg, cmdSplat, cmdSheet, CmdShortDesc, CmdMoniker, CmdOOC, CmdPose, CmdEmit, cmdSubmit, CmdApprove
-from commands.rouse import CmdRouse, CmdSlake
-from evennia.contrib.game_systems import mail
+from commands.admin import AdminCmdSet
+from commands.chargen import ChargenCmdSet
+from commands.comms import CommsCmdSet
+from commands.dice import DiceCmdSet
+from commands.notes import NotesCmdSet
+from commands.v5 import V5CmdSet
+from bbs.CmdSet import CmdSet as BBSCmdSet
 from jobs.jobCmdSet import JobCmdSet
-from bbs.CmdSet import CmdSet as CmdBBS
-from .notes import cmdNotes, CmdNoteApprove, CmdNoteProve
-from .dice import dice
-from evennia.contrib.game_systems.multidescer import CmdMultiDesc 
+from evennia.contrib.game_systems.mail import CmdMail
+from evennia.contrib.game_systems.multidescer import CmdMultiDesc
+
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
     """
@@ -38,29 +41,21 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         Populates the cmdset
         """
         super().at_cmdset_creation()
-        #
-        # any commands you add below will overload the default ones.
-        #
-        self.add(cmdCg)
-        self.add(cmdSplat)
-        self.add(cmdSheet)
-        self.add(mail.CmdMail())
-        self.add(CmdShortDesc())
-        self.add(CmdOOC())
-        self.add(CmdPose())
-        self.add(CmdEmit())
-        self.add(cmdSubmit())
-        self.add(CmdMoniker())
+        # Custom CmdSets
+        self.add(AdminCmdSet())
+        self.add(ChargenCmdSet())
+        self.add(CommsCmdSet())
+        self.add(DiceCmdSet())
+        self.add(NotesCmdSet())
+        self.add(V5CmdSet())
+        # Custom Apps CmdSets
+        self.add(BBSCmdSet())
         self.add(JobCmdSet())
-        self.add(CmdApprove())
-        self.add(CmdBBS())
-        self.add(cmdNotes())
-        self.add(CmdNoteApprove())
-        self.add(CmdNoteProve())
-        self.add(dice())
-        self.add(CmdRouse())
-        self.add(CmdSlake())
+    
+        # Evennia contrib Commands
+        self.add(CmdMail())
         self.add(CmdMultiDesc())
+
 
 class AccountCmdSet(default_cmds.AccountCmdSet):
     """
