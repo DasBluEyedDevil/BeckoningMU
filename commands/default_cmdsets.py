@@ -19,8 +19,8 @@ from commands.admin import AdminCmdSet
 from commands.character import CustomCharacterCmdSet
 from commands.chargen import ChargenCmdSet
 from commands.comms import CommsCmdSet
-from commands.dice import DiceCmdSet
 from commands.notes import NotesCmdSet
+from commands.roleplaying import RpCmdSet
 from commands.v5 import V5CmdSet
 from bbs.CmdSet import CmdSet as BBSCmdSet
 from jobs.jobCmdSet import JobCmdSet
@@ -47,8 +47,8 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         self.add(CustomCharacterCmdSet())
         self.add(ChargenCmdSet())
         self.add(CommsCmdSet())
-        self.add(DiceCmdSet())
         self.add(NotesCmdSet())
+        self.add(RpCmdSet())
         self.add(V5CmdSet())
         # Custom Apps CmdSets
         self.add(BBSCmdSet())
