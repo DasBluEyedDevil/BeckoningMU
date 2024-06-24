@@ -69,32 +69,32 @@ class Room(ObjectParent, DefaultRoom):
         },
     }
 
-    def get_display_name(self, looker, session, **kwargs):
+    def get_display_name(self, looker, **kwargs):
         """
         Displays the name of the object in a viewer-aware manner.
         """
         return super().get_display_name(looker, **kwargs)
 
-    def get_extra_display_name_info(self, looker, session, **kwargs):
+    def get_extra_display_name_info(self, looker, **kwargs):
         """
         Adds any extra display information to the object's name. By default this is is the
         object's dbref in parentheses, if the looker has permission to see it.
         """
         return super().get_extra_display_name_info(looker, **kwargs)
 
-    def get_display_tags(self, looker, session, **kwargs):
+    def get_display_tags(self, looker, **kwargs):
         """
         Returns a list of textual tags to add to the rooms title string.
         """
         return (tag for tag in self.display_tag_mapping.keys() if self.tags.has(tag))
 
-    def get_display_desc(self, looker, session, **kwargs):
+    def get_display_desc(self, looker, **kwargs):
         """
         Returns the displayed description of the room
         """
         return self.db.desc or "You see nothing special."
 
-    def get_display_characters(self, looker, session, **kwargs):
+    def get_display_characters(self, looker, **kwargs):
         """
         Returns a list of DefaultCharacters that should be displayed in the room for the given viewer.
         """
@@ -104,7 +104,7 @@ class Room(ObjectParent, DefaultRoom):
             if char.has_account and char.access(looker, "view")
         ]
 
-    def get_display_exits(self, looker, session, **kwargs):
+    def get_display_exits(self, looker, **kwargs):
         """
         Returns a list of DefaultExits that should be displayed in the room for the given viewer.
         """
@@ -118,7 +118,7 @@ class Room(ObjectParent, DefaultRoom):
         width = _get_client_width(session)
         return styles["fill_char"] * width
 
-    def format_header(self, looker, session, header, **kwargs):
+    def format_header(self, looker, header, **kwargs):
         """
         Applies extra formatting to the rooms display header
         """
@@ -130,7 +130,7 @@ class Room(ObjectParent, DefaultRoom):
     # The values are the text to display when the tag is present on the room
     display_tag_mapping = {"ooc": "OOC Area", "chargen": "CG"}
 
-    def format_title(self, looker, session, name, extra_name_info, tags, **kwargs):
+    def format_title(self, looker, name, extra_name_info, tags, session, **kwargs):
         """
         Applies extra formatting to the rooms title string.
         The title includes the name, displayed tags, and extra name info such as dbrefs for builders
@@ -143,13 +143,13 @@ class Room(ObjectParent, DefaultRoom):
         width = _get_client_width(session)
         return ANSIString(title).center(width, styles["fill_char"])
 
-    def format_desc(self, looker, session, desc, **kwargs):
+    def format_desc(self, looker, desc, **kwargs):
         """
         Applies extra formatting to the rooms display description
         """
         return desc
 
-    def format_exit_section(self, looker, session, exits, **kwargs):
+    def format_exit_section(self, looker, exits, session, **kwargs):
         """
         Returns how the exits of a room should be displayed when viewed from inside the room.
         """
@@ -184,7 +184,7 @@ class Room(ObjectParent, DefaultRoom):
             )
         return ANSIString("\n").join(table.get())
 
-    def format_character_section(self, looker, session, characters, **kwargs):
+    def format_character_section(self, looker, characters, session, **kwargs):
         """
         Returns how the characters inside a room should be displayed when viewed from inside the room.
         """
@@ -226,7 +226,7 @@ class Room(ObjectParent, DefaultRoom):
         )
         return ANSIString("\n").join(table.get())
 
-    def format_footer(self, looker, session, footer, **kwargs):
+    def format_footer(self, looker, footer, **kwargs):
         """
         Applies extra formatting to the rooms display footer
         """
@@ -236,44 +236,34 @@ class Room(ObjectParent, DefaultRoom):
         """
         This is the hook for returning the appearance of the room.
         """
-        # try to use lookers session if none provided
         if session is None and looker.sessions.count():
-            # last session is most recently added
             session = looker.sessions.all()[-1]
+        kwargs["session"] = session
 
         header = self.format_header(
-            looker, session, self.get_display_header(looker, **kwargs), **kwargs
-        )
+            looker, self.get_display_header(looker, **kwargs), **kwargs)
 
-        name = self.get_display_name(looker, session, **kwargs)
+        name = self.get_display_name(looker, **kwargs)
 
-        extra_name_info = self.get_extra_display_name_info(
-            looker, session, **kwargs)
+        extra_name_info = self.get_extra_display_name_info(looker, **kwargs)
 
-        tags = self.get_display_tags(looker, session, **kwargs)
+        tags = self.get_display_tags(looker, **kwargs)
 
         title = self.format_title(
-            looker, session, name, extra_name_info, tags, **kwargs
-        )
+            looker, name, extra_name_info, tags, **kwargs)
 
         desc = self.format_desc(
-            looker, session, self.get_display_desc(looker, session, **kwargs)
-        )
+            looker, self.get_display_desc(looker, **kwargs), **kwargs)
 
         character_section = self.format_character_section(
-            looker,
-            session,
-            self.get_display_characters(looker, session, **kwargs),
-            **kwargs,
-        )
+            looker, self.get_display_characters(looker, **kwargs), **kwargs)
+
         exit_section = self.format_exit_section(
-            looker, session, self.get_display_exits(looker, session, **kwargs), **kwargs
-        )
+            looker, self.get_display_exits(looker, **kwargs), **kwargs)
 
         footer = self.format_footer(
             looker,
-            session,
-            self.get_display_footer(looker, session, **kwargs),
+            self.get_display_footer(looker, **kwargs),
             **kwargs,
         )
 
