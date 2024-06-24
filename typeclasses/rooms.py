@@ -247,8 +247,6 @@ class Room(ObjectParent, DefaultRoom):
         """
         This is the hook for returning the appearance of the room.
         """
-        kwargs["session"] = session
-
         header = self.format_header(
             looker, self.get_display_header(looker, **kwargs), **kwargs)
 
