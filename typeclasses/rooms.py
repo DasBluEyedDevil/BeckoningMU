@@ -232,11 +232,15 @@ class Room(ObjectParent, DefaultRoom):
         """
         return footer
 
-    def return_appearance(self, looker, session, **kwargs):
+    def return_appearance(self, looker, session=None, **kwargs):
         """
         This is the hook for returning the appearance of the room.
         """
-        print(session)
+        # try to use lookers session if none provided
+        if session is None and looker.sessions.count():
+            # last session is most recently added
+            session = looker.sessions.all()[-1]
+
         header = self.format_header(
             looker, session, self.get_display_header(looker, **kwargs), **kwargs
         )
