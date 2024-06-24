@@ -552,7 +552,7 @@ class CmdSubmit(MuxCommand):
 
     key = "submit"
     locks = "cmd:all()"
-    help_category = "General"
+    help_category = "Character"
 
     def func(self):
         """Submit the application"""
