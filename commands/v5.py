@@ -25,7 +25,7 @@ class CmdRouse(MuxCommand):
     key = "+rouse"
     aliases = ["rouse", "ro"]
     locks = "cmd:all()"
-    help_category = "General"
+    help_category = "Vampire"
 
     def func(self):
         if self.caller.db.stats["bio"]["splat"] == "vampire":
@@ -77,7 +77,7 @@ class CmdSlake(MuxCommand):
     key = "+slake"
     aliases = ["slake", "sl"]
     locks = "cmd:all()"
-    help_category = "General"
+    help_category = "Vampire"
 
     def func(self):
         try:
