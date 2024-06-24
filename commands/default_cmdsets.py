@@ -26,6 +26,7 @@ from bbs.CmdSet import CmdSet as BBSCmdSet
 from jobs.jobCmdSet import JobCmdSet
 from evennia.contrib.game_systems.mail import CmdMail
 from evennia.contrib.game_systems.multidescer import CmdMultiDesc
+from evennia.contrib.utils.git_integration import GitCmdSet
 
 
 class CharacterCmdSet(default_cmds.CharacterCmdSet):
@@ -53,6 +54,8 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         # Custom Apps CmdSets
         self.add(BBSCmdSet())
         self.add(JobCmdSet())
+        # Evennia contrib CmdSets
+        self.add(GitCmdSet())
         # Evennia contrib Commands
         self.add(CmdMail())
         self.add(CmdMultiDesc())
