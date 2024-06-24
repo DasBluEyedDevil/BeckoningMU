@@ -57,7 +57,7 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         # Evennia contrib CmdSets
         self.add(GitCmdSet())
         # Evennia contrib Commands
-        self.add(CmdMail())
+        self.add(CmdMail(help_category="Comms"))
         self.add(CmdMultiDesc())
 
 
