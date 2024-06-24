@@ -5,8 +5,9 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-evennia = "^4.1.1"
+evennia = {extras = ["extras"], version = "^4.1.1"}
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
