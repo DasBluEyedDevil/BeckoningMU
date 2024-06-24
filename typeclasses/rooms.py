@@ -169,7 +169,7 @@ class Room(ObjectParent, DefaultRoom):
         """
         if not exits:
             return ""
-        width = _get_client_width(session, session)
+        width = _get_client_width(looker, session)
         table = EvTable(
             width=width,
             **{
