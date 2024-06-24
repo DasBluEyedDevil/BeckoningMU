@@ -40,7 +40,7 @@ class CmdSplat(MuxCommand):
     key = "+splat"
     aliases = ["splat", "+splats", "splats"]
     locks = "cmd:all()"
-    help_category = "Character Generation"
+    help_category = "Character"
 
     def func(self):
         if not self.caller.locks.check_lockstring(
@@ -144,7 +144,7 @@ class CmdStat(MuxCommand):
     key = "+stats"
     aliases = ["stat"]
     locks = "cmd:all()"
-    help_category = "Character Generation"
+    help_category = "Character"
 
     def func(self):
         if not self.caller.locks.check_lockstring(self.caller, "perm(Admin)"):
@@ -508,7 +508,7 @@ class CmdSubmit(MuxCommand):
 
     key = "submit"
     locks = "cmd:all()"
-    help_category = "Character Generation"
+    help_category = "Character"
 
     def func(self):
         """Submit the application"""
@@ -593,7 +593,7 @@ class CmdApprove(MuxCommand):
 
     key = "approve"
     locks = "cmd:perm(Builder)"
-    help_category = "Character Generation"
+    help_category = "Character"
 
     def func(self):
         """Submit the application"""

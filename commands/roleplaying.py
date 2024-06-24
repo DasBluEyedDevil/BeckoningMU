@@ -32,7 +32,7 @@ class CmdShortDesc(MuxCommand):
     """
 
     key = "+short"
-    help_category = "Character Generation"
+    help_category = "Character"
     aliases = ["shortdesc", "+shortdesc", "short"]
     locks = "cmd:all()"
     help_category = "Character"
@@ -55,7 +55,7 @@ class CmdMoniker(MuxCommand):
     """
 
     key = "+moniker"
-    help_category = "Character Generation"
+    help_category = "Character"
     aliases = ["moniker", "+moniker"]
     locks = "cmd:all()"
     help_category = "Character"
