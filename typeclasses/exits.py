@@ -7,7 +7,6 @@ for allowing Characters to traverse the exit to its destination.
 
 """
 from evennia.objects.objects import DefaultExit
-from evennia.utils.ansi import ANSIString
 
 from .objects import ObjectParent
 
