@@ -593,7 +593,7 @@ class CmdApprove(MuxCommand):
 
     key = "approve"
     locks = "cmd:perm(Builder)"
-    help_category = "General"
+    help_category = "Character Generation"
 
     def func(self):
         """Submit the application"""
