@@ -5,7 +5,8 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-evennia = {extras = ["extras"], version = "^4.1.1"}
+evennia = "^4.1.1"
+gitpython = "^3.1.43"
 
 [build-system]
 requires = ["poetry-core"]
