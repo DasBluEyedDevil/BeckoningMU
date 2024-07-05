@@ -23,13 +23,12 @@ def _get_client_width(looker, session=None):
     If no session is found on the looker, will use the DEFAULT_CLIENT_WIDTH
     from settings
     """
-    if session is None and looker.sessions.count():
+    if session is None and looker is not None and looker.sessions.count():
         session = looker.sessions.all()[-1]
     if session is not None:
-        return session.get_client_size()[0]
+        return min(settings.CLIENT_DEFAULT_WIDTH, session.get_client_size()[0])
     else:
-        return settings.DEFAULT_CLIENT_WIDTH
-
+        return settings.CLIENT_DEFAULT_WIDTH
 
 class Room(ObjectParent, DefaultRoom):
     """
