@@ -74,6 +74,29 @@ OPTIONS_ACCOUNT_DEFAULT = {
     "timezone": ("Timezone for dates.", "Timezone", "UTC"),
 }
 
+# Different Multisession modes allow a player (=account) to connect to the
+# game simultaneously with multiple clients (=sessions).
+#  0 - single session per account (if reconnecting, disconnect old session)
+#  1 - multiple sessions per account, all sessions share output
+#  2 - multiple sessions per account, one session allowed per puppet
+#  3 - multiple sessions per account, multiple sessions per puppet (share output)
+#      session getting the same data.
+MULTISESSION_MODE = 3
+
+# The maximum number of characters allowed by be created by the default ooc
+# char-creation command. This can be seen as how big of a 'stable' of characters
+# an account can have (not how many you can puppet at the same time). Set to
+# None for no limit.
+MAX_NR_CHARACTERS = 10
+
+# How many *different* characters an account can puppet *at the same time*. A value
+# above 1 only makes a difference together with MULTISESSION_MODE > 1.
+MAX_NR_SIMULTANEOUS_PUPPETS = 3
+
+
+# Disable the default autocreate account logic because we implement our own custom logic for this
+AUTO_CREATE_CHARACTER_WITH_ACCOUNT = False
+
 ######################################################################
 # Settings given in secret_settings.py override those in this file.
 ######################################################################

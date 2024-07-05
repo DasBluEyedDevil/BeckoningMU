@@ -38,8 +38,8 @@ class ObjectParent:
         """
 
         return min(
-            settings.CLIENT_DEFAULT_WIDTH,
-            *(session.get_client_size()[0] for session in self.sessions.all()),
+            [settings.CLIENT_DEFAULT_WIDTH]
+            + [session.get_client_size()[0] for session in self.sessions.get()],
         )
 
 

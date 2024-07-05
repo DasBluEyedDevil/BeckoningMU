@@ -92,7 +92,20 @@ class Account(DefaultAccount):
 
     """
 
-    pass
+    @classmethod
+    def create(cls, *args, **kwargs):
+        account, errors = DefaultAccount.create(*args, **kwargs)
+        # Auto-create the OOC avatar for this account
+        if account:
+            character, errs = account.create_character(
+                typeclass=kwargs.get("character_typeclass", account.default_character_typeclass)
+            )
+            if character:
+                character.tags.add("ooc")
+                account.db.ooc_avatar = character
+            if errs:
+                errors.extend(errs)
+        return account, errors
 
 
 class Guest(DefaultGuest):
