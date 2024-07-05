@@ -16,7 +16,6 @@ own cmdsets by inheriting from them or directly from `evennia.CmdSet`.
 
 from evennia import default_cmds
 from commands.admin import AdminCmdSet
-from commands.character import CustomCharacterCmdSet
 from commands.chargen import ChargenCmdSet
 from commands.comms import CommsCmdSet
 from commands.notes import NotesCmdSet
@@ -45,7 +44,6 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         super().at_cmdset_creation()
         # Custom CmdSets
         self.add(AdminCmdSet())
-        self.add(CustomCharacterCmdSet())
         self.add(ChargenCmdSet())
         self.add(CommsCmdSet())
         self.add(NotesCmdSet())

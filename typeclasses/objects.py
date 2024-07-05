@@ -10,7 +10,9 @@ the other types, you can do so by adding this as a multiple
 inheritance.
 
 """
+
 from evennia.objects.objects import DefaultObject
+from django.conf import settings
 
 
 class ObjectParent:
@@ -23,6 +25,22 @@ class ObjectParent:
     take precedence.
 
     """
+
+    def get_min_client_width(self):
+        """
+        Get the minimum client width that will display on any of the attached
+        sessions.
+
+        If no session is found on the looker, will use the DEFAULT_CLIENT_WIDTH
+        from settings.
+
+        Returned width can never exceed DEFAULT_CLIENT_WIDTH
+        """
+
+        return min(
+            settings.CLIENT_DEFAULT_WIDTH,
+            *(session.get_client_size()[0] for session in self.sessions.all()),
+        )
 
 
 class Object(ObjectParent, DefaultObject):
@@ -170,4 +188,5 @@ class Object(ObjectParent, DefaultObject):
                                  object speaks
 
     """
+
     pass
