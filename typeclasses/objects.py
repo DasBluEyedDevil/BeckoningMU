@@ -26,6 +26,14 @@ class ObjectParent:
 
     """
 
+    @property
+    def is_ooc(self):
+        return self.tags.has("ooc")
+
+    @property
+    def is_ic(self):
+        return not self.is_ooc
+
     def get_min_client_width(self):
         """
         Get the minimum client width that will display on any of the attached

@@ -8,9 +8,9 @@ creation commands.
 
 """
 
-from evennia.objects.objects import DefaultCharacter
+from evennia.objects.objects import DefaultCharacter, DefaultObject
+from evennia.accounts.accounts import DefaultAccount
 from .objects import ObjectParent
-from world.data import STATS
 
 
 class Character(ObjectParent, DefaultCharacter):
@@ -36,9 +36,6 @@ class Character(ObjectParent, DefaultCharacter):
 
     def at_object_creation(self):
         super().at_object_creation()
-
-        # initialize attributes
-        self.db.stats = STATS
 
     def get_display_name(self, looker=None, **kwargs):
         """
@@ -107,3 +104,57 @@ class Character(ObjectParent, DefaultCharacter):
             time_str = f"|g{seconds}s|n"
         return time_str.strip()
 
+
+class OOCAvatar(Character):
+    """
+    A typeclass for "OOC" Avatar Characters.
+
+    An OOC Avatar as created on account creation and used to interact with OOC environments
+    """
+
+    @classmethod
+    def create(
+        cls,
+        key,
+        account: "DefaultAccount" = None,
+        caller: "DefaultObject" = None,
+        method: str = "create",
+        **kwargs,
+    ):
+        """
+        Creates a basic Character with default parameters, unless otherwise
+        specified or extended.
+
+        Provides a friendlier interface to the utils.create_character() function.
+
+        Args:
+            key (str): Name of the new Character.
+            account (obj, optional): Account to associate this Character with.
+                If unset supplying None-- it will
+                change the default lockset and skip creator attribution.
+
+        Keyword Args:
+            description (str): Brief description for this object.
+            ip (str): IP address of creator (for object auditing).
+            All other kwargs will be passed into the create_object call.
+
+        Returns:
+            tuple: `(new_character, errors)`. On error, the `new_character` is `None` and
+            `errors` is a `list` of error strings (an empty list otherwise).
+
+        """
+        if account is None:
+            return None, "OOC Avatar must be associated to an account"
+        if account.db.ooc_avatar:
+            return None, f"Account {account} alraedy has an OOC Avatar"
+        # set typeclass if none provided
+        if kwargs.get("typeclass") is None:
+            kwargs["typeclass"] = f"{cls.__module__}.{cls.__name__}"
+
+        char, errors = Character.create(key, account, caller, method, **kwargs)
+
+        if char:
+            account.db.ooc_avatar = char
+            char.tags.add("ooc")
+
+        return char, errors
