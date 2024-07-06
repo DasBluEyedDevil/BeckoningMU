@@ -71,7 +71,7 @@ class Room(ObjectParent, DefaultRoom):
         The keys are the names of the Evennia Tags that should be displayed.
         The values are the text to display when that tag is present on the object
         """
-        return {"ooc": "OOC Area", "chargen": "CG"}
+        return {"ooc": "OOC Area"}
 
 
     def get_display_desc(self, looker, **kwargs):
