@@ -64,27 +64,15 @@ class Room(ObjectParent, DefaultRoom):
         },
     }
 
-    def get_display_name(self, looker, **kwargs):
+    def get_display_tag_mapping(self, looker, **kwargs):
         """
-        Displays the name of the object in a viewer-aware manner.
-        """
-        return super().get_display_name(looker, **kwargs)
-
-    def get_extra_display_name_info(self, looker, **kwargs):
-        """
-        Adds any extra display information to the object's name. By default this is is the
-        object's dbref in parentheses, if the looker has permission to see it.
-        """
-        return super().get_extra_display_name_info(looker, **kwargs)
-
-    def get_display_tag_mapping(self, looker):
-        """
-        These are tags that are displayed next to the name of a room
+        Returns a mapping of Evennia tags that should be displayed next to the name of an object
 
         The keys are the names of the Evennia Tags that should be displayed.
-        The values are the text to display when that tag is present on the room.
+        The values are the text to display when that tag is present on the object
         """
         return {"ooc": "OOC Area", "chargen": "CG"}
+
 
     def get_display_desc(self, looker, **kwargs):
         """
@@ -192,15 +180,7 @@ class Room(ObjectParent, DefaultRoom):
 
         name = self.get_display_name(looker, **kwargs)
 
-        extra_name_info = self.get_extra_display_name_info(looker, **kwargs)
-
-        display_tag_mapping = self.get_display_tag_mapping(looker, **kwargs)
-
-        tags = " ".join(
-            f"|w[{display_tag_mapping[tag] or tag}]|n" for tag in display_tag_mapping.keys() if self.tags.has(tag))
-
-        title = f"|Y[|n {tags}|w{name}|w{extra_name_info} |Y]|n"
-        title = ANSIString(title).center(
+        title = ANSIString(f"|Y[|n {name} |Y]|n").center(
             looker.get_min_client_width(), self.styles["title"]["fill_char"])
 
         desc = self.get_display_desc(looker, **kwargs)
