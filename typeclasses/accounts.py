@@ -23,41 +23,9 @@ several more options for customizing the Guest account system.
 """
 
 from evennia.accounts.accounts import DefaultAccount, DefaultGuest
-from evennia.typeclasses.tags import TagProperty
 
 
-class ParentAccount:
-    """
-    This is a mixin class to override behavior for *all* account classes.
-
-    This makes it easier to share behavior between guest accounts and regular accounts
-    """
-    ooc_avatar_typeclass = "typeclasses.characters.OOCAvatar"
-
-    @property
-    def ooc(self):
-        """ Accounts are always considered OOC """
-        return True
-
-    @property
-    def ic(self):
-        """ Accounts are never considered IC """
-        return False
-
-    @classmethod
-    def create(cls, *args, **kwargs):
-        kwargs.setdefault("typeclass", cls)
-        account, errors = DefaultAccount.create(*args, **kwargs)
-        # Auto-create the OOC avatar for this account
-        if account:
-            character, errs = account.create_character(
-                typeclass=kwargs.get("character_typeclass", cls.ooc_avatar_typeclass)
-            )
-            if errs:
-                errors.extend(errs)
-        return account, errors
-
-class Account(ParentAccount, DefaultAccount):
+class Account(DefaultAccount):
     """
     This class describes the actual OOC account (i.e. the user connecting
     to the MUD). It does NOT have visual appearance in the game world (that
@@ -124,7 +92,32 @@ class Account(ParentAccount, DefaultAccount):
 
     """
 
-class Guest(ParentAccount, DefaultGuest):
+    ooc_avatar_typeclass = "typeclasses.characters.OOCAvatar"
+
+    @property
+    def ooc(self):
+        """ Accounts are always considered OOC """
+        return True
+
+    @property
+    def ic(self):
+        """ Accounts are never considered IC """
+        return False
+
+    @classmethod
+    def create(cls, *args, **kwargs):
+        kwargs.setdefault("typeclass", cls)
+        account, errors = super(Account, cls).create(*args, **kwargs)
+        # Auto-create the OOC avatar for this account
+        if account:
+            character, errs = account.create_character(
+                typeclass=kwargs.get("character_typeclass", cls.ooc_avatar_typeclass)
+            )
+            if errs:
+                errors.extend(errs)
+        return account, errors
+
+class Guest(DefaultGuest):
     """
     This class is used for guest logins. Unlike Accounts, Guests and their
     characters are deleted after disconnection.

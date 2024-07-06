@@ -118,18 +118,15 @@ class OOCAvatar(Character):
             `errors` is a `list` of error strings (an empty list otherwise).
 
         """
-        if account is None:
-            return None, "OOC Avatar must be associated to an account"
-        if account.db.ooc_avatar:
-            return None, f"Account {account} alraedy has an OOC Avatar"
-        # set typeclass if none provided
-        if kwargs.get("typeclass") is None:
-            kwargs["typeclass"] = f"{cls.__module__}.{cls.__name__}"
+        char, errors = super(Character, cls).create(key, account, caller, method, **kwargs)
 
-        char, errors = Character.create(key, account, caller, method, **kwargs)
-
-        if char:
+        # Make this character the account's primary OOC avatar if it doesn't already have one
+        if account and char and not account.db.ooc_avatar:
             account.db.ooc_avatar = char
-            char.tags.add("ooc")
 
         return char, errors
+
+    def at_object_creation(self):
+        super().at_object_creation()
+        self.tags.add("ooc")
+
