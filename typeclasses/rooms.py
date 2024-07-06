@@ -77,11 +77,14 @@ class Room(ObjectParent, DefaultRoom):
         """
         return super().get_extra_display_name_info(looker, **kwargs)
 
-    def get_display_tags(self, looker, **kwargs):
+    def get_display_tag_mapping(self, looker):
         """
-        Returns a list of textual tags to add to the rooms title string.
+        These are tags that are displayed next to the name of a room
+
+        The keys are the names of the Evennia Tags that should be displayed.
+        The values are the text to display when that tag is present on the room.
         """
-        return (tag for tag in self.display_tag_mapping.keys() if self.tags.has(tag))
+        return {"ooc": "OOC Area", "chargen": "CG"}
 
     def get_display_desc(self, looker, **kwargs):
         """
@@ -93,95 +96,11 @@ class Room(ObjectParent, DefaultRoom):
         """
         Returns a list of DefaultCharacters that should be displayed in the room for the given viewer.
         """
-        return [
+        characters = [
             char
             for char in self.contents
             if char.has_account and char.access(looker, "view")
         ]
-
-    def get_display_exits(self, looker, **kwargs):
-        """
-        Returns a list of DefaultExits that should be displayed in the room for the given viewer.
-        """
-        return [exit for exit in self.contents if exit.destination]
-
-    def get_display_footer(self, looker, **kwargs):
-        """
-        Get the 'footer' of the room description. Called by `return_appearance`.
-        """
-        styles = self.styles["footer"]
-        width = looker.get_min_client_width()
-        return styles["fill_char"] * width
-
-    def format_header(self, looker, header, **kwargs):
-        """
-        Applies extra formatting to the rooms display header
-        """
-        return header
-
-    # These are tags that are displayed next to the name of the room
-    #
-    # The keys are the names of the tags
-    # The values are the text to display when the tag is present on the room
-    display_tag_mapping = {"ooc": "OOC Area", "chargen": "CG"}
-
-    def format_title(self, looker, name, extra_name_info, tags, **kwargs):
-        """
-        Applies extra formatting to the rooms title string.
-        The title includes the name, displayed tags, and extra name info such as dbrefs for builders
-        """
-        tags = "".join(f"|w[{self.display_tag_mapping[tag] or tag}]|n" for tag in tags)
-        tags = f"{tags} " if tags else ""
-        title = f"|Y[|n {tags}|w{name}|w{extra_name_info} |Y]|n"
-        styles = self.styles["title"]
-        width = looker.get_min_client_width()
-        return ANSIString(title).center(width, styles["fill_char"])
-
-    def format_desc(self, looker, desc, **kwargs):
-        """
-        Applies extra formatting to the rooms display description
-        """
-        return desc
-
-    def format_exit_section(self, looker, exits, **kwargs):
-        """
-        Returns how the exits of a room should be displayed when viewed from inside the room.
-        """
-        if not exits:
-            return ""
-        width = looker.get_min_client_width()
-        table = EvTable(
-            width=width,
-            **{
-                **self.styles["section_table"],
-                **self.styles["exit_section_table"],
-            },
-        )
-        table.add_header(
-            " |wExits|n ",
-            **{
-                **self.styles["section_header"],
-                **self.styles["exit_section_header"],
-            },
-        )
-        exits = [
-            exit.get_display_name(looker)
-            for exit in sorted(exits, key=lambda e: e.name)
-        ]
-        for i in range(0, len(exits), self.exits_per_row):
-            table.add_row(
-                *exits[i : i + self.exits_per_row],
-                **{
-                    **self.styles["section_contents"],
-                    **self.styles["exit_section_contents"],
-                },
-            )
-        return ANSIString("\n").join(table.get())
-
-    def format_character_section(self, looker, characters, **kwargs):
-        """
-        Returns how the characters inside a room should be displayed when viewed from inside the room.
-        """
         if not characters:
             return ""
         width = looker.get_min_client_width()
@@ -220,45 +139,77 @@ class Room(ObjectParent, DefaultRoom):
         )
         return ANSIString("\n").join(table.get())
 
-    def format_footer(self, looker, footer, **kwargs):
+    def get_display_exits(self, looker, **kwargs):
         """
-        Applies extra formatting to the rooms display footer
+        Returns a list of DefaultExits that should be displayed in the room for the given viewer.
         """
-        return footer
+        exits = [exit for exit in self.contents if exit.destination]
+
+        if not exits:
+            return ""
+        width = looker.get_min_client_width()
+        table = EvTable(
+            width=width,
+            **{
+                **self.styles["section_table"],
+                **self.styles["exit_section_table"],
+            },
+        )
+        table.add_header(
+            " |wExits|n ",
+            **{
+                **self.styles["section_header"],
+                **self.styles["exit_section_header"],
+            },
+        )
+        exits = [
+            exit.get_display_name(looker)
+            for exit in sorted(exits, key=lambda e: e.name)
+        ]
+        for i in range(0, len(exits), self.exits_per_row):
+            table.add_row(
+                *exits[i: i + self.exits_per_row],
+                **{
+                    **self.styles["section_contents"],
+                    **self.styles["exit_section_contents"],
+                },
+            )
+        return ANSIString("\n").join(table.get())
+
+    def get_display_footer(self, looker, **kwargs):
+        """
+        Get the 'footer' of the room description. Called by `return_appearance`.
+        """
+        styles = self.styles["footer"]
+        width = looker.get_min_client_width()
+        return styles["fill_char"] * width
 
     def return_appearance(self, looker, **kwargs):
         """
         This is the hook for returning the appearance of the room.
         """
-        header = self.format_header(
-            looker, self.get_display_header(looker, **kwargs), **kwargs
-        )
+        header = self.get_display_header(looker, **kwargs)
 
         name = self.get_display_name(looker, **kwargs)
 
         extra_name_info = self.get_extra_display_name_info(looker, **kwargs)
 
-        tags = self.get_display_tags(looker, **kwargs)
+        display_tag_mapping = self.get_display_tag_mapping(looker, **kwargs)
 
-        title = self.format_title(looker, name, extra_name_info, tags, **kwargs)
+        tags = " ".join(
+            f"|w[{display_tag_mapping[tag] or tag}]|n" for tag in display_tag_mapping.keys() if self.tags.has(tag))
 
-        desc = self.format_desc(
-            looker, self.get_display_desc(looker, **kwargs), **kwargs
-        )
+        title = f"|Y[|n {tags}|w{name}|w{extra_name_info} |Y]|n"
+        title = ANSIString(title).center(
+            looker.get_min_client_width(), self.styles["title"]["fill_char"])
 
-        character_section = self.format_character_section(
-            looker, self.get_display_characters(looker, **kwargs), **kwargs
-        )
+        desc = self.get_display_desc(looker, **kwargs)
 
-        exit_section = self.format_exit_section(
-            looker, self.get_display_exits(looker, **kwargs), **kwargs
-        )
+        character_section = self.get_display_characters(looker, **kwargs)
 
-        footer = self.format_footer(
-            looker,
-            self.get_display_footer(looker, **kwargs),
-            **kwargs,
-        )
+        exit_section = self.get_display_exits(looker, **kwargs)
+
+        footer = self.get_display_footer(looker, **kwargs)
 
         return ANSIString("\n\n").join(
             s
