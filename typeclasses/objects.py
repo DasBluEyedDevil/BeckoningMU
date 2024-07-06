@@ -79,30 +79,7 @@ class ObjectParent:
         """
         tags = self.get_display_tags(looker, **kwargs)
         name = self.db.moniker or self.name
-        extra_info = self.get_extra_display_name_info(looker, **kwargs)
-        return f"{tags}{name}{extra_info}"
-
-    def get_extra_display_name_info(self, looker=None, **kwargs):
-        """
-        Adds any extra display information to the object's name. By default this is is the
-        object's dbref in parentheses, if the looker has permission to see it.
-
-        Args:
-            looker (DefaultObject): The object looking at this object.
-
-        Returns:
-            str: The dbref of this object, if the looker has permission to see it. Otherwise, an
-            empty string is returned.
-
-        Notes:
-            By default, this becomes a string (#dbref) attached to the object's name.
-
-        """
-        if looker and \
-                self.locks.check_lockstring(looker, "perm(Builder)") and \
-                not looker.tags.has("hide_dbrefs"):
-            return f"(#{self.id})"
-        return ""
+        return f"{tags}{name}"
 
     def get_min_client_width(self):
         """

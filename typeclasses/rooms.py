@@ -151,7 +151,7 @@ class Room(ObjectParent, DefaultRoom):
             },
         )
         exits = [
-            exit.get_display_name(looker)
+            exit.get_display_name(looker, **kwargs)
             for exit in sorted(exits, key=lambda e: e.name)
         ]
         for i in range(0, len(exits), self.exits_per_row):
