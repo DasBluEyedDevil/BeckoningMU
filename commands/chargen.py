@@ -4,7 +4,6 @@ This module contains the commands for character generation.
 """
 
 from evennia.commands.cmdset import CmdSet
-from evennia.commands.default.muxcommand import MuxCommand
 from world.data import (
     get_trait_list,
     SPLATS,
@@ -13,6 +12,7 @@ from world.data import (
 from evennia.utils.ansi import ANSIString
 from .utils import target
 from jobs.commands.commands import CmdJob
+from .command import Command
 
 
 class ChargenCmdSet(CmdSet):
@@ -24,7 +24,7 @@ class ChargenCmdSet(CmdSet):
         self.add(CmdApprove())
 
 
-class CmdSplat(MuxCommand):
+class CmdSplat(Command):
     """
     This is the command to set a sphere on a character. This must be
     done before any other chargen commands can be used.
@@ -106,7 +106,7 @@ class CmdSplat(MuxCommand):
         )
 
 
-class CmdStat(MuxCommand):
+class CmdStat(Command):
     """
     This command is used to create a character. it is the main
     method of setting tour character's chargen settings.
@@ -498,7 +498,7 @@ class CmdStat(MuxCommand):
             )
 
 
-class CmdSubmit(MuxCommand):
+class CmdSubmit(Command):
     """
     Submit a character application!
 
@@ -542,7 +542,7 @@ class CmdSubmit(MuxCommand):
         caller.db.submitted = True
 
 
-class CmdSubmit(MuxCommand):
+class CmdSubmit(Command):
     """
     Submit a character application!
 
@@ -583,7 +583,7 @@ class CmdSubmit(MuxCommand):
         caller.db.submitted = True
 
 
-class CmdApprove(MuxCommand):
+class CmdApprove(Command):
     """
     Approve a character application!
 

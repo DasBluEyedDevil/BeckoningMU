@@ -1,9 +1,8 @@
-from evennia.commands.default.muxcommand import MuxCommand
-from evennia.utils.ansi import ANSIString
+from .command import Command
 import random
 
 
-class CmdRouse(MuxCommand):
+class CmdRouse(Command):
     """
     Usage: +rouse
 
@@ -49,7 +48,7 @@ class CmdRouse(MuxCommand):
             return
 
 
-class CmdSlake(MuxCommand):
+class CmdSlake(Command):
     """
     Usage: +slake <number>
 

@@ -74,6 +74,10 @@ OPTIONS_ACCOUNT_DEFAULT = {
     "timezone": ("Timezone for dates.", "Timezone", "UTC"),
 }
 
+# Parent class for all default commands. Changing this class will
+# modify all default commands, so do so carefully.
+COMMAND_DEFAULT_CLASS = "commands.command.Command"
+
 # Different Multisession modes allow a player (=account) to connect to the
 # game simultaneously with multiple clients (=sessions).
 #  0 - single session per account (if reconnecting, disconnect old session)

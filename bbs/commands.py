@@ -1,15 +1,16 @@
 from evennia import default_cmds
-from evennia.utils import list_to_string
+from evennia.utils import list_to_string, class_from_module
 from evennia.utils.ansi import ANSIString
 # update this import to match your project structure
 from .models import Board, Post, Comment
 # get the AccountDB class from the engine
 from evennia.accounts.models import AccountDB
 from datetime import datetime
-from evennia.commands.default.muxcommand import MuxCommand
+from django.conf import settings
 
+COMMAND_DEFAULT_CLASS = class_from_module(settings.COMMAND_DEFAULT_CLASS)
 
-class CmdBBS(default_cmds.MuxCommand):
+class CmdBBS(COMMAND_DEFAULT_CLASS):
     """
     This method is designed to handle multiple commands related to an interactive message board functionality. The usage is as follows:
 

@@ -3,8 +3,8 @@ Commands for Vampire: the Masquerade 5th edition characters.
 
 """
 
-from evennia.commands.default.muxcommand import MuxCommand
 from evennia.commands.cmdset import CmdSet
+from .command import Command
 import random
 
 
@@ -15,7 +15,7 @@ class V5CmdSet(CmdSet):
         self.add(CmdSlake())
 
 
-class CmdRouse(MuxCommand):
+class CmdRouse(Command):
     """
     Usage: +rouse
 
@@ -67,7 +67,7 @@ class CmdRouse(MuxCommand):
             return
 
 
-class CmdSlake(MuxCommand):
+class CmdSlake(Command):
     """
     Usage: +slake <number>
 

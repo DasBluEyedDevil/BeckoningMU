@@ -40,24 +40,6 @@ def target(context):
         "specialty": specialty
     }
 
-
-def is_approved(target):
-    try:
-        if target.db.stats["approved"] == True or target.perm_check("Admin"):
-            return True
-        else:
-            return False
-    except:
-        return False
-
-
-def is_ic(target):
-    if target.db.stats["ic"] == True:
-        return True
-    else:
-        return False
-
-
 def format(key="", val=0, width=24, just="rjust", type="", temp=0):
     title = "|w" if val else "|x"
     title += key.capitalize() + ":|n"

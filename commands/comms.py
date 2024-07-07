@@ -1,6 +1,6 @@
 from evennia.commands.cmdset import CmdSet
-from evennia.commands.default.muxcommand import MuxCommand
 from evennia.utils.ansi import ANSIString
+from .command import Command
 
 
 class CommsCmdSet(CmdSet):
@@ -9,7 +9,7 @@ class CommsCmdSet(CmdSet):
         self.add(CmdOOCSay())
 
 
-class CmdOOCSay(MuxCommand):
+class CmdOOCSay(Command):
     """
     Say something to the room while Out-of-Character (OOC).
 

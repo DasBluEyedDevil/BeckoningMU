@@ -1,13 +1,17 @@
 from jobs.models import Bucket, Job, Comment
 from evennia.objects.models import ObjectDB
-from evennia.commands.default.muxcommand import MuxCommand
 from evennia.accounts.models import AccountDB
+from evennia.utils import class_from_module
 from evennia.utils.ansi import ANSIString
 from evennia.contrib.game_systems.mail import CmdMail
 from jobs.models import Job, Comment
 from evennia.utils.utils import lazy_property
+from django.conf import settings
 
-class CmdBucket(MuxCommand):
+COMMAND_DEFAULT_CLASS = class_from_module(settings.COMMAND_DEFAULT_CLASS)
+
+
+class CmdBucket(COMMAND_DEFAULT_CLASS):
     """
     Manage job buckets.
 
@@ -110,7 +114,7 @@ class CmdBucket(MuxCommand):
         self.caller.msg(output)
 
 
-class CmdJob(MuxCommand):
+class CmdJob(COMMAND_DEFAULT_CLASS):
     """
     Manage jobs
 
@@ -438,7 +442,7 @@ class CmdJob(MuxCommand):
 
 
 
-class CmdMyJobs(MuxCommand):
+class CmdMyJobs(COMMAND_DEFAULT_CLASS):
     """
     Interact with your jobs.
 

@@ -1,8 +1,8 @@
 import random
 from evennia.commands.cmdset import CmdSet
-from evennia.commands.default.muxcommand import MuxCommand
 from evennia.utils.ansi import ANSIString
 from jobs.commands.commands import CmdJob
+from .command import Command
 from world.data import (
     BIO,
     get_trait_list,
@@ -23,7 +23,7 @@ class RpCmdSet(CmdSet):
         self.add(CmdDice())
 
 
-class CmdShortDesc(MuxCommand):
+class CmdShortDesc(Command):
     """
     Set your short description.
 
@@ -46,7 +46,7 @@ class CmdShortDesc(MuxCommand):
         self.caller.msg("Short description set to '%s'." % self.args.strip())
 
 
-class CmdMoniker(MuxCommand):
+class CmdMoniker(Command):
     """
     Set your moniker.
 
@@ -75,7 +75,7 @@ class CmdMoniker(MuxCommand):
         self.caller.msg("Moniker set to '%s'." % self.args.strip())
 
 
-class CmdPose(MuxCommand):
+class CmdPose(Command):
     """
     strike a pose
 
@@ -138,7 +138,7 @@ class CmdPose(MuxCommand):
                     f"{self.caller.get_display_name(looker)}{self.args}")
 
 
-class CmdSheet(MuxCommand):
+class CmdSheet(Command):
     """
     This command is used to view a character's sheet. Staff can view any character's
     sheet, but players can only view their own.
@@ -545,7 +545,7 @@ class CmdSheet(MuxCommand):
         self.caller.msg(ANSIString(ANSIString("|R=|n") * 78))
 
 
-class CmdDice(MuxCommand):
+class CmdDice(Command):
     """
     This is the dice roller command. It takes a dice pool and rolls that many dice.
 
