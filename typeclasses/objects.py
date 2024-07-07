@@ -26,12 +26,6 @@ class ObjectParent:
 
     """
 
-    ooc = TagProperty()
-
-    @property
-    def ic(self):
-        return not self.ooc
-
     def get_display_tags(self, looker, **kwargs):
 
         display_tag_mapping = self.get_display_tag_mapping(looker, **kwargs)
@@ -53,7 +47,7 @@ class ObjectParent:
         """
         mapping = {}
         # Show OOC tag only when in an IC room
-        if looker is None or hasattr(looker, "location") and looker.location.ic:
+        if looker is None or hasattr(looker, "location") and not looker.location.tags.has("ooc"):
             mapping["ooc"] = "OOC"
         return mapping
 

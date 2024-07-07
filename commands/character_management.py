@@ -56,7 +56,7 @@ class CmdIC(Command):
         else:
             # argument given
 
-            if playables := filter(lambda char: char.ic, account.characters):
+            if playables := filter(lambda char: not char.tags.has("ooc"), account.characters):
                 # look at the playable_characters list first
                 character_candidates.extend(
                     utils.make_iter(
@@ -126,7 +126,7 @@ class CmdOOC(Command):
             return
 
         old_char = account.get_puppet(session)
-        if not old_char or old_char.ooc:
+        if not old_char or old_char.tags.has("ooc"):
             self.msg("You are already OOC.")
             return
         new_char = account.db.ooc_avatar

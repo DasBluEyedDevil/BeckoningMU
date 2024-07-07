@@ -94,16 +94,6 @@ class Account(DefaultAccount):
 
     ooc_avatar_typeclass = "typeclasses.characters.OOCAvatar"
 
-    @property
-    def ooc(self):
-        """ Accounts are always considered OOC """
-        return True
-
-    @property
-    def ic(self):
-        """ Accounts are never considered IC """
-        return False
-
     @classmethod
     def create(cls, *args, **kwargs):
         kwargs.setdefault("typeclass", cls)
