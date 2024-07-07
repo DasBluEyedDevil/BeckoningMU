@@ -9,6 +9,8 @@ import random
 
 
 class V5CmdSet(CmdSet):
+    key = "V5"
+
     def at_cmdset_creation(self):
         super().at_cmdset_creation()
         self.add(CmdRouse())

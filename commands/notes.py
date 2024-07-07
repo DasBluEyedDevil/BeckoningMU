@@ -4,6 +4,8 @@ from evennia.utils.ansi import ANSIString
 from .command import Command
 
 class NotesCmdSet(CmdSet):
+    key = "Notes"
+
     def at_cmdset_creation(self):
         super().at_cmdset_creation()
         self.add(CmdNotes())

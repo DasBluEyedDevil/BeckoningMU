@@ -15,14 +15,16 @@ own cmdsets by inheriting from them or directly from `evennia.CmdSet`.
 """
 
 from evennia import default_cmds
-from commands.admin import AdminCmdSet
+from commands.admin import AdminCmdSet, AdminAccountCmdSet
+from commands.character_management import CharacterManagementCmdSet
 from commands.chargen import ChargenCmdSet
 from commands.comms import CommsCmdSet
 from commands.notes import NotesCmdSet
-from commands.roleplaying import RpCmdSet
+from commands.rp import RPCmdSet
 from commands.v5 import V5CmdSet
 from bbs.CmdSet import CmdSet as BBSCmdSet
 from jobs.jobCmdSet import JobCmdSet
+from evennia.commands.default.building import CmdTag
 from evennia.contrib.game_systems.mail import CmdMail
 from evennia.contrib.game_systems.multidescer import CmdMultiDesc
 from evennia.contrib.utils.git_integration import GitCmdSet
@@ -42,21 +44,22 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
         Populates the cmdset
         """
         super().at_cmdset_creation()
-        # Custom CmdSets
+        #
+        # any commands you add below will overload the default ones.
+        #
+
+        # Game-specific CmdSets
         self.add(AdminCmdSet())
         self.add(ChargenCmdSet())
-        self.add(CommsCmdSet())
-        self.add(NotesCmdSet())
-        self.add(RpCmdSet())
+        self.add(CommsCmdSet())  # TODO: make account cmdset
+        self.add(NotesCmdSet())  # TODO: make account cmdset
+        self.add(RPCmdSet())
         self.add(V5CmdSet())
-        # Custom Apps CmdSets
-        self.add(BBSCmdSet())
-        self.add(JobCmdSet())
-        # Evennia contrib CmdSets
-        self.add(GitCmdSet())
         # Evennia contrib Commands
-        self.add(CmdMail(help_category="Comms"))
+        self.add(CmdMail(help_category="comms"))
         self.add(CmdMultiDesc())
+        # Fix a bug in CmdTag where "switch_options" is typod as "options"
+        self.add(CmdTag(switch_options=getattr(CmdTag, "options", getattr(CmdTag, "switch_options", None))))
 
 
 class AccountCmdSet(default_cmds.AccountCmdSet):
@@ -77,6 +80,16 @@ class AccountCmdSet(default_cmds.AccountCmdSet):
         #
         # any commands you add below will overload the default ones.
         #
+
+        # Game-specific CmdSets
+        self.add(AdminAccountCmdSet())
+        self.add(CharacterManagementCmdSet())
+        # Installed Apps CmdSets
+        self.add(BBSCmdSet())
+        self.add(JobCmdSet())
+        # Evennia contrib CmdSets
+        self.add(GitCmdSet())
+        self.add(CmdMail(help_category="comms"))
 
 
 class UnloggedinCmdSet(default_cmds.UnloggedinCmdSet):

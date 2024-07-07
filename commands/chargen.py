@@ -16,6 +16,8 @@ from .command import Command
 
 
 class ChargenCmdSet(CmdSet):
+    key = "Chargen"
+
     def at_cmdset_creation(self):
         super().at_cmdset_creation()
         self.add(CmdSplat())
@@ -40,7 +42,7 @@ class CmdSplat(Command):
     key = "+splat"
     aliases = ["splat", "+splats", "splats"]
     locks = "cmd:all()"
-    help_category = "Character"
+    help_category = "character"
 
     def func(self):
         if not self.caller.locks.check_lockstring(
@@ -144,7 +146,7 @@ class CmdStat(Command):
     key = "+stats"
     aliases = ["stat"]
     locks = "cmd:all()"
-    help_category = "Character"
+    help_category = "character"
 
     def func(self):
         if not self.caller.locks.check_lockstring(self.caller, "perm(Admin)"):
@@ -508,7 +510,7 @@ class CmdSubmit(Command):
 
     key = "submit"
     locks = "cmd:all()"
-    help_category = "Character"
+    help_category = "character"
 
     def func(self):
         """Submit the application"""
@@ -552,7 +554,7 @@ class CmdSubmit(Command):
 
     key = "submit"
     locks = "cmd:all()"
-    help_category = "Character"
+    help_category = "character"
 
     def func(self):
         """Submit the application"""
@@ -593,7 +595,7 @@ class CmdApprove(Command):
 
     key = "approve"
     locks = "cmd:perm(Builder)"
-    help_category = "Character"
+    help_category = "character"
 
     def func(self):
         """Submit the application"""

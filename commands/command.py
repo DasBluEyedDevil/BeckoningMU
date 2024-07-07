@@ -76,3 +76,4 @@ class Command(MuxCommand):
         if "help" in self.switches:
             self.msg(self.get_help(self.caller, self.cmdset))
             raise InterruptCommand
+

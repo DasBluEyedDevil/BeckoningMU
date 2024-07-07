@@ -4,6 +4,8 @@ from .command import Command
 
 
 class CommsCmdSet(CmdSet):
+    key = "Comms"
+
     def at_cmdset_creation(self):
         super().at_cmdset_creation()
         self.add(CmdOOCSay())
