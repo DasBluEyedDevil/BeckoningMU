@@ -19,7 +19,7 @@ class V5CmdSet(CmdSet):
 
 class CmdRouse(Command):
     """
-    Usage: +rouse
+    Usage: rouse
 
     This command rolls a rouse check.  It takes the hunger mechanic into account.
     """
@@ -71,7 +71,7 @@ class CmdRouse(Command):
 
 class CmdSlake(Command):
     """
-    Usage: +slake <number>
+    Usage: slake <number>
 
     This command slakes your hunger by the number you specify.
     """

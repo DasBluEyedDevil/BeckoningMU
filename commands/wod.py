@@ -31,9 +31,9 @@ class CmdSheet(Command):
     sheet, but players can only view their own.
 
     Usage:
-        +sheet [<target>]
+        sheet [<target>]
 
-    See also: +stats, +splat
+    See also: stats, splat
     """
 
     key = "sheet"
@@ -437,22 +437,22 @@ class CmdDice(Command):
     This is the dice roller command. It takes a dice pool and rolls that many dice.
 
     Usage:
-        +roll <dice pool>
-        +roll/perm <dice pool>
+        roll <dice pool>
+        roll/perm <dice pool>
 
         The first form of this command rolls a dice pool, which is a combination of
         sheet traits plus numbers.  It takes temp scores into account.  The seccond
         form of this command only works with your permentant values in your traits.
 
     Example:
-        +roll str + brawl  + 2
-        +roll 5
-        +roll/perm dex + melee
-        +roll dex + 2 - 1
+        roll str + brawl  + 2
+        roll 5
+        roll/perm dex + melee
+        roll dex + 2 - 1
 
         This command also akes the hunger mechanic itto account.
 
-        Aww Also: +stats +sheet
+        Aww Also: stats sheet
     """
 
     key = "roll"
@@ -511,14 +511,14 @@ class CmdDice(Command):
         ones = 0
         crits = 0
         if not self.args:
-            self.caller.msg("Usage: +roll <dice pool>")
+            self.caller.msg("Usage: roll <dice pool>")
             return
 
         if "job" in self.switches:
             try:
                 job, roll = self.args.split(" ", 1)
             except ValueError:
-                self.caller.msg("Usage: +roll/job <id> <dice pool>")
+                self.caller.msg("Usage: roll/job <id> <dice pool>")
                 return
         else:
             roll = self.args

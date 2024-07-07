@@ -14,6 +14,8 @@ from .utils import target
 from jobs.commands.commands import CmdJob
 from .command import Command
 
+HELP_CATEGORY = "character"
+
 
 class ChargenCmdSet(CmdSet):
     key = "Chargen"
@@ -32,17 +34,17 @@ class CmdSplat(Command):
     done before any other chargen commands can be used.
 
     Usage:
-        +splats to see a list of valid splats.
-        +splat [<target>=]<splat> - Sets the splat of the character.
+        splats to see a list of valid splats.
+        splat [<target>=]<splat> - Sets the splat of the character.
 
-    see also: +sheet +stats
+    see also: sheet stats
 
     """
 
     key = "splat"
     aliases = ["+splat", "+splats", "splats"]
     locks = "cmd:all()"
-    help_category = "character"
+    help_category = HELP_CATEGORY
 
     def func(self):
         if not self.caller.locks.check_lockstring(
@@ -114,39 +116,39 @@ class CmdStat(Command):
     method of setting tour character's chargen settings.
 
     WARNING!!  Before you can use this command, you must set your
-    splat with +splat!
+    splat with the splat command!
 
     Usage:
-        +stat[/temp] [<target>/]<trait>=[<value>][/<specialty>]
+        stat[/temp] [<target>/]<trait>=[<value>][/<specialty>]
 
 
         examples:
-            +stat strength=3
-            +stat  athletics=2/Running
-            +stat/temp str=3
+            stat strength=3
+            stat  athletics=2/Running
+            stat/temp str=3
 
-            +stat Diablerie/strength=3
-            +stat Diablerie/athletics=2/Running
+            stat Diablerie/strength=3
+            stat Diablerie/athletics=2/Running
 
             To reset a stat, leave the value blank.  When you resete
             a stat, you must also reset the specialties.
 
-                +stat strength=
+                stat strength=
 
-            To reset a specialty, leave the specialty blank.
+            To rset a specialty, leave the specialty blank.
 
-                +stat athletics=/Running
+                stat athletics=/Running
 
-        To reset your whole +sheet use |r+stats/wipe|n.
+        To reset your whole sheet use |rstats/wipe|n.
 
-    See also:  +splat +sheet
+    See also:  splat sheet
 
     """
 
     key = "stat"
     aliases = ["+stat", "stats", "+stats"]
     locks = "cmd:all()"
-    help_category = "character"
+    help_category = HELP_CATEGORY
 
     def func(self):
         if not self.caller.locks.check_lockstring(self.caller, "perm(Admin)"):
@@ -160,26 +162,26 @@ class CmdStat(Command):
                 self.caller.msg("You are already approved.")
                 return
         try:
-            # if the command was +stats/wipe me=confirm, then wipe the stats.
+            # if the command was stats/wipe me=confirm, then wipe the stats.
             if self.switches[0] == "wipe" and self.rhs == "confirm":
                 self.caller.db.stats = STATS
                 self.caller.msg("|wSTATS>|n Your stats have been wiped.")
                 return
 
-            # if the command was +stats/wipe. then comfirm they need to use +stats/wipe me=confirm
+            # if the command was stats/wipe. then comfirm they need to use stats/wipe me=confirm
             if self.switches[0] == "wipe":
                 self.caller.msg(
                     "|wSTATS>|n You are about to wipe your stats.  This cannot be undone."
                 )
                 self.caller.msg(
-                    "|wSTATS>|n To confirm, use: |r+stats/wipe me=confirm|n"
+                    "|wSTATS>|n To confirm, use: |rstats/wipe me=confirm|n"
                 )
                 return
         except IndexError:
             pass
 
         if not self.args:
-            self.caller.msg("|wSTATS>|n Usage: +stat <trait>=<value>")
+            self.caller.msg("|wSTATS>|n Usage: stat <trait>=<value>")
             return
 
         if not self.rhs and "+" in self.lhs or "-" in self.lhs:
@@ -510,7 +512,7 @@ class CmdSubmit(Command):
 
     key = "submit"
     locks = "cmd:all()"
-    help_category = "character"
+    help_category = HELP_CATEGORY
 
     def func(self):
         """Submit the application"""
@@ -544,47 +546,6 @@ class CmdSubmit(Command):
         caller.db.submitted = True
 
 
-class CmdSubmit(Command):
-    """
-    Submit a character application!
-
-    Usage:
-      submit
-    """
-
-    key = "submit"
-    locks = "cmd:all()"
-    help_category = "character"
-
-    def func(self):
-        """Submit the application"""
-        caller = self.caller
-        if not caller.location.tags.has("chargen"):
-            caller.msg(
-                "This command can only be used in Character Generation areas.")
-            return
-
-        if caller.db.submitted:
-            caller.msg("|wSTATS>|n You have already submitted an application.")
-            return
-
-        if caller.db.stats["approved"]:
-            caller.msg("|wSTATS>|n You have already been approved.")
-            return
-
-        description = "%s has submitted an application." % caller.name
-
-        CmdJob.create_job(
-            self,
-            bucket_title="CGEN",
-            title="Character Generation",
-            description=description,
-            created_by=caller,
-        )
-        self.caller.msg("|wSTATS>|n Application submitted.")
-        caller.db.submitted = True
-
-
 class CmdApprove(Command):
     """
     Approve a character application!
@@ -595,7 +556,7 @@ class CmdApprove(Command):
 
     key = "approve"
     locks = "cmd:perm(Builder)"
-    help_category = "character"
+    help_category = HELP_CATEGORY
 
     def func(self):
         """Submit the application"""
