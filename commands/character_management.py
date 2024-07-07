@@ -22,10 +22,14 @@ class CmdIC(Command):
     Go in-character (IC) as a given character.
 
     Usage:
+      ic
       ic <character>
 
     Use the "character list" (or "characters") command to see a list of
     your playable characters.
+
+    If no character name is given, you will take control of the last
+    character you played as.
     """
     key = "ic"
     help_category = "character"
