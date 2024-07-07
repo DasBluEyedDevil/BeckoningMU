@@ -19,20 +19,13 @@ class CharacterManagementCmdSet(CmdSet):
 
 class CmdIC(Command):
     """
-    Control a character that you have permission to control.
+    Go in-character (IC) as a given character.
 
     Usage:
       ic <character>
 
-    Go in-character (IC) as a given character.
-
-    This will attempt to "become" a different character assuming you have
-    the right to do so. Note that it's the ACCOUNT that puppets
-    characters/objects and which needs to have the correct permission!
-
-    You cannot become an object that is already controlled by another
-    account. In principle <character> can be any in-game object as long
-    as you the account have access right to puppet it.
+    Use the "character list" (or "characters") command to see a list of
+    your playable characters.
     """
     key = "ic"
     help_category = "character"
