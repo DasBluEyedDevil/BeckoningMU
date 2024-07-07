@@ -39,8 +39,8 @@ class CmdSplat(Command):
 
     """
 
-    key = "+splat"
-    aliases = ["splat", "+splats", "splats"]
+    key = "splat"
+    aliases = ["+splat", "+splats", "splats"]
     locks = "cmd:all()"
     help_category = "character"
 
@@ -143,8 +143,8 @@ class CmdStat(Command):
 
     """
 
-    key = "+stats"
-    aliases = ["stat"]
+    key = "stat"
+    aliases = ["+stat", "stats", "+stats"]
     locks = "cmd:all()"
     help_category = "character"
 

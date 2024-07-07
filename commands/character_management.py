@@ -1,13 +1,24 @@
 import random
 from evennia.commands.cmdset import CmdSet
+import evennia.commands.default as default_cmds
 from evennia import utils
 from evennia.utils import logger
 from evennia.utils.ansi import ANSIString
 from .command import Command
 from jobs.commands.commands import CmdJob
 
+HELP_CATEGORY = "character"
 
 class CharacterManagementCmdSet(CmdSet):
+    """
+    Commands for management and creation of Player Characters.
+
+    These are Account-level commands because they are intended to be
+    useable regardless of whether the player is puppeting a Character or not.
+    This is helpful, for example, if a player somehow gets stuck outside
+    of a Character for some reason.
+
+    """
     key = "CharacterManagement"
 
     def at_cmdset_creation(self):
@@ -15,7 +26,6 @@ class CharacterManagementCmdSet(CmdSet):
         # use default IC command and move to "character" help category
         self.add(CmdIC())
         self.add(CmdOOC())
-
 
 class CmdIC(Command):
     """
@@ -32,7 +42,7 @@ class CmdIC(Command):
     character you played as.
     """
     key = "ic"
-    help_category = "character"
+    help_category = HELP_CATEGORY
     # lock must be all() for different puppeted objects to access it.
     locks = "cmd:all()"
     # this is used by the parent
@@ -107,7 +117,7 @@ class CmdOOC(Command):
 
     key = "ooc"
     locks = "cmd:pperm(Player)"
-    help_category = "character"
+    help_category = HELP_CATEGORY
 
     # this is used by the parent
     account_caller = True

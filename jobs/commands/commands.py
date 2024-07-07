@@ -8,6 +8,8 @@ from jobs.models import Job, Comment
 from evennia.utils.utils import lazy_property
 from django.conf import settings
 
+HELP_CATEGORY = "jobs"
+
 COMMAND_DEFAULT_CLASS = class_from_module(settings.COMMAND_DEFAULT_CLASS)
 
 
@@ -23,10 +25,10 @@ class CmdBucket(COMMAND_DEFAULT_CLASS):
         bucket/list
     """
     pass
-    key = "+bucket"
+    key = "bucket"
     locks = "cmd:perm(bucket) or perm(Builder)"
-    aliases = ["buckets", "bucket"]
-    help_category = "Jobs"
+    aliases = ["+bucket", "buckets", "+buckets"]
+    help_category = HELP_CATEGORY
 
     def func(self):
         if not self.args and not self.switches:
@@ -137,8 +139,8 @@ class CmdJob(COMMAND_DEFAULT_CLASS):
 
     key = "jobs"
     locks = "cmd:perm(job) or perm(Builder)"
-    aliases = ["job"]
-    help_category = "Jobs"
+    aliases = ["job", "+job", "+jobs"]
+    help_category = HELP_CATEGORY
 
     def func(self):
         if not self.args and not self.switches:
@@ -455,9 +457,9 @@ class CmdMyJobs(COMMAND_DEFAULT_CLASS):
     Allows players to manage their job submissions.
     """
     key = "myjobs"
-    aliases = "myjob"
+    aliases = ["myjob", "+myjobs", "+myjob"]
     locks = "cmd:all()"
-    help_category = "Jobs"
+    help_category = HELP_CATEGORY
 
     @lazy_property
     def jobs(self):

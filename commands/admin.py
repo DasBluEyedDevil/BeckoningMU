@@ -5,7 +5,15 @@ from evennia.utils.ansi import ANSIString
 from evennia.utils.search import object_search
 from .command import Command
 
+HELP_CATEGORY = "admin"
+
 class AdminCmdSet(CmdSet):
+    """
+    Commands for game administrators.
+
+    This CmdSet is for Character-level commands, for Account-level commands
+    use AdminAccountCmdSet
+    """
     key = "Admin"
 
     def at_cmdset_creation(self):
@@ -13,6 +21,12 @@ class AdminCmdSet(CmdSet):
         self.add(CmdEmit())
 
 class AdminAccountCmdSet(CmdSet):
+    """
+    Commands for game administrators.
+
+    This CmdSet is for Account-level commands, for Character-level commands
+    use AccountCmdSet
+    """
     key = "AdminAccount"
 
     def at_cmdset_creation(self):
@@ -45,7 +59,7 @@ class CmdEmit(Command):
     aliases = ["pemit", "remit"]
     switch_options = ("room", "accounts", "contents")
     locks = "cmd:perm(emit) or perm(Builder)"
-    help_category = "Admin"
+    help_category = HELP_CATEGORY
 
     def func(self):
 
@@ -118,7 +132,7 @@ class CmdPuppet(Command):
     as you the account have access right to puppet it.
     """
     key = "puppet"
-    help_category = "admin"
+    help_category = HELP_CATEGORY
     # lock must be all() for different puppeted objects to access it.
     locks = "cmd:perm(puppet) or cmd:pperm(Builder)"
     # this is used by the account
@@ -201,7 +215,7 @@ class CmdUnpuppet(default_cmds.account.CmdOOC):
     """
     key = "unpuppet"
     aliases = []
-    help_category = "admin"
+    help_category = HELP_CATEGORY
     locks = "cmd:perm(puppet) or cmd:pperm(Builder)"
     # this is used by the account
     account_caller = True

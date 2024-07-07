@@ -1,7 +1,3 @@
-"""
-Commands for Vampire: the Masquerade 5th edition characters.
-
-"""
 
 from evennia.commands.cmdset import CmdSet
 from .command import Command
@@ -9,6 +5,10 @@ import random
 
 
 class V5CmdSet(CmdSet):
+    """
+    Commands for Vampire: the Masquerade 5th Edition characters.
+
+    """
     key = "V5"
 
     def at_cmdset_creation(self):
@@ -24,8 +24,8 @@ class CmdRouse(Command):
     This command rolls a rouse check.  It takes the hunger mechanic into account.
     """
 
-    key = "+rouse"
-    aliases = ["rouse", "ro"]
+    key = "rouse"
+    aliases = ["+rouse", "ro", "+ro"]
     locks = "cmd:all()"
     help_category = "Vampire"
 
@@ -76,8 +76,8 @@ class CmdSlake(Command):
     This command slakes your hunger by the number you specify.
     """
 
-    key = "+slake"
-    aliases = ["slake", "sl"]
+    key = "slake"
+    aliases = ["+slake", "sl", "+sl"]
     locks = "cmd:all()"
     help_category = "Vampire"
 

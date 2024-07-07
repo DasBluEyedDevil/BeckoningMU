@@ -38,7 +38,7 @@ class CmdBBS(COMMAND_DEFAULT_CLASS):
     """
 
     key = "+bbs"
-    aliases = ["+BBS", "bbs", "+bb", "bb", "bbview", "bbread"]
+    aliases = ["+BBS", "bbs", "+bb", "bb", "bbview", "bbread", "+bbread"]
     lock = "cmd:all()"
     help_category = "Boards"
 

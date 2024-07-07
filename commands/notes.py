@@ -3,7 +3,12 @@ from datetime import datetime
 from evennia.utils.ansi import ANSIString
 from .command import Command
 
+HELP_CATEGORY = "notes"
+
 class NotesCmdSet(CmdSet):
+    """
+    Commands for interacting with the notes system.
+    """
     key = "Notes"
 
     def at_cmdset_creation(self):
@@ -15,34 +20,34 @@ class NotesCmdSet(CmdSet):
 class CmdNotes(Command):
     """
  READ NOTES
-   +notes                      - see all your notes
-   +note <note name or number> - see your note
-   +note/<category>            - see all your notes in a category
+   notes                      - see all your notes
+   note <note name or number> - see your note
+   note/<category>            - see all your notes in a category
 
-   +note <target>/*            - see all visible notes on someone else
-   +note <target>/<note>       - see a note on someone else
-   +note/<category> <target>/* - see all notes on someone else in a category
+   note <target>/*            - see all visible notes on someone else
+   note <target>/<note>       - see a note on someone else
+   note/<category> <target>/* - see all notes on someone else in a category
 
- MAKE NOTES
-   +note <name>=<text>            - make a note called <name>
-   +note/<category> <name>=<text> - make a note in a specific category
+ MAE NOTES
+   note <name>=<text>            - make a note called <name>
+   note/<category> <name>=<text> - make a note in a specific category
 
- EDIT NOTES
-   +note <note>=<new text>     - change the text on a note, removes approval
-   +notemove <note>=<category> - move a note to a new category, keeps approval
-   +note/<category> <note>=<new text> - change the text of a note into
-                                        a new category, removes approval
-   +notestatus <note>=PRIVATE|PUBLIC  - make a note in-/visible to others
+ EDT NOTES
+   note <note>=<new text>     - change the text on a note, removes approval
+   notemove <note>=<category> - move a note to a new category, keeps approval
+   note/<category> <note>=<new text> - change the text of a note into
+                                       a new category, removes approval
+   notestatus <note>=PRIVATE|PUBLIC  - make a note in-/visible to others
 
- SHOW NOTES
-   +noteprove <note>=<target(s)> - show any note to a list of targets
+ SHW NOTES
+   noteprove <note>=<target(s)> - show any note to a list of targets
                                  - (names or dbrefs separated by commas)
   """
 
-    key = "+notes"
-    aliases = ["+notes", "notes", "+note", "note", "+n", "n"]
+    key = "notes"
+    aliases = ["+notes", "@notes", "notes", "+note", "@note", "note", "+n", "@n", "n"]
     locks = "cmd:all()"
-    help_category = "notes"
+    help_category = HELP_CATEGORY
 
     def get_target(self, target):
         """
@@ -243,8 +248,9 @@ class CmdNoteApprove(Command):
     Approves a note.  If no target is specified, then it's assumed that the target is the caller.
     """
     key = "note/approve"
-    locks = "cmd:perm(Immortals)"
-    help_category = "Notes"
+    aliases = ["+note/approve", "@note/approve", "n/approve", "+n/approve", "@n/approve"]
+    locks = "cmd:perm(Admin)"
+    help_category = HELP_CATEGORY
 
     def func(self):
         """
@@ -283,8 +289,9 @@ class CmdNoteProve(Command):
     Proves a note.  If no target is specified, then it's assumed that the target is the room.
     """
     key = "note/prove"
+    aliases = ["+note/prove", "@note/prove", "n/prove", "+n/prove", "@n/prove"]
     locks = "cmd:all()"
-    help_category = "Notes"
+    help_category = HELP_CATEGORY
 
     def func(self):
         """

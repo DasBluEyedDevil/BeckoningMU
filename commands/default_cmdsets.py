@@ -16,17 +16,18 @@ own cmdsets by inheriting from them or directly from `evennia.CmdSet`.
 
 from evennia import default_cmds
 from commands.admin import AdminCmdSet, AdminAccountCmdSet
+from commands.building import BuildingCmdSet
+from commands.character_customization import CharacterCustomizationCmdSet
 from commands.character_management import CharacterManagementCmdSet
 from commands.chargen import ChargenCmdSet
-from commands.comms import CommsCmdSet
+from commands.comms import CommsCmdSet, CommsAccountCmdSet
 from commands.notes import NotesCmdSet
 from commands.rp import RPCmdSet
 from commands.v5 import V5CmdSet
+from commands.wod import WoDCmdSet
 from bbs.CmdSet import CmdSet as BBSCmdSet
 from jobs.jobCmdSet import JobCmdSet
 from evennia.commands.default.building import CmdTag
-from evennia.contrib.game_systems.mail import CmdMail
-from evennia.contrib.game_systems.multidescer import CmdMultiDesc
 from evennia.contrib.utils.git_integration import GitCmdSet
 
 
@@ -50,14 +51,14 @@ class CharacterCmdSet(default_cmds.CharacterCmdSet):
 
         # Game-specific CmdSets
         self.add(AdminCmdSet())
+        self.add(BuildingCmdSet())
+        self.add(CharacterCustomizationCmdSet())
         self.add(ChargenCmdSet())
-        self.add(CommsCmdSet())  # TODO: make account cmdset
+        self.add(CommsCmdSet())
         self.add(NotesCmdSet())  # TODO: make account cmdset
         self.add(RPCmdSet())
         self.add(V5CmdSet())
-        # Evennia contrib Commands
-        self.add(CmdMail(help_category="comms"))
-        self.add(CmdMultiDesc())
+        self.add(WoDCmdSet())
         # Fix a bug in CmdTag where "switch_options" is typod as "options"
         self.add(CmdTag(switch_options=getattr(CmdTag, "options", getattr(CmdTag, "switch_options", None))))
 
@@ -84,12 +85,11 @@ class AccountCmdSet(default_cmds.AccountCmdSet):
         # Game-specific CmdSets
         self.add(AdminAccountCmdSet())
         self.add(CharacterManagementCmdSet())
+        self.add(CommsAccountCmdSet())
         # Installed Apps CmdSets
-        self.add(BBSCmdSet())
         self.add(JobCmdSet())
         # Evennia contrib CmdSets
         self.add(GitCmdSet())
-        self.add(CmdMail(help_category="comms"))
 
 
 class UnloggedinCmdSet(default_cmds.UnloggedinCmdSet):
