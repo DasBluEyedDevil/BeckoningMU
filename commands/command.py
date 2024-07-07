@@ -58,11 +58,16 @@ class Command(MuxCommand):
             We override the MuxCommand parser here to add the following:
                 * /help switch on all commands to show help text
         """
-        # add /help switch to expected switch options
-        if not hasattr(self, "switch_options"):
-            self.switch_options = ["help"]
+        # MuxCommand uses switch_options to determine which switches
+        # are allowed. Add "help" as a valid switch before parsing.
+        if not hasattr(self, "switch_options") or not self.switch_options:
+            self.switch_options = ("help",)
         elif "help" not in self.switch_options:
-            self.switch_options.append("help")
+            # Some commands use list others use tuple. Annoying
+            if isinstance(self.switch_options, list):
+                self.switch_options.append("help")
+            elif isinstance(self.switch_options, tuple):
+                self.switch_options += ("help",)
 
         # call MuxCommand parser
         super().parse()
