@@ -60,7 +60,7 @@ class Command(MuxCommand):
         """
         # MuxCommand uses switch_options to determine which switches
         # are allowed. Add "help" as a valid switch before parsing.
-        if not hasattr(self, "switch_options") or not self.switch_options:
+        if not hasattr(self, "switch_options") or self.switch_options is None:
             self.switch_options = ("help",)
         elif "help" not in self.switch_options:
             # Some commands use list others use tuple. Annoying
