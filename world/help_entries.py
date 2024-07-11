@@ -67,6 +67,10 @@ for dir_path, dirs, files in os.walk(HELP_FILES_DIR):
     else:
         category = dir_path.name
 
+    # skip Examples category
+    if category == "examples":
+        continue
+
     for file_name in files:
         name, ext = os.path.splitext(file_name)
         file_path = dir_path.joinpath(file_name)
