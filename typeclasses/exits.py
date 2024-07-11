@@ -40,7 +40,7 @@ class Exit(ObjectParent, DefaultExit):
     def get_display_name(self, looker=None, **kwargs):
         # helper to create a clickable link
         def make_link(cmd, text):
-            return f"|lc{cmd}|lt{text}|le"
+            return f"|lc {cmd} |lt{text}|le"
 
         # create clickable link from name
         name_link = make_link(self.name, self.name)
