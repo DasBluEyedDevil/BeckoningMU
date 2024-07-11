@@ -1,6 +1,5 @@
 
 from evennia.commands.cmdset import CmdSet
-import evennia.commands.default as default_cmds
 from evennia.contrib.game_systems.multidescer import CmdMultiDesc
 from .command import Command
 
@@ -20,8 +19,7 @@ class CharacterCustomizationCmdSet(CmdSet):
         self.add(CmdMoniker())
         # Evennia contrib Commands
         self.add(CmdMultiDesc(key="desc", aliases=["+desc"], help_category=HELP_CATEGORY))
-        # Override help category of Evennia default commands
-        # self.add(default_cmds.general.CmdSetDesc(help_category=HELP_CATEGORY))
+
 
 class CmdShortDesc(Command):
     """

@@ -1,13 +1,10 @@
-import random
 from evennia.commands.cmdset import CmdSet
-import evennia.commands.default as default_cmds
 from evennia import utils
 from evennia.utils import logger
-from evennia.utils.ansi import ANSIString
 from .command import Command
-from jobs.commands.commands import CmdJob
 
 HELP_CATEGORY = "character"
+
 
 class CharacterManagementCmdSet(CmdSet):
     """
@@ -26,6 +23,7 @@ class CharacterManagementCmdSet(CmdSet):
         # use default IC command and move to "character" help category
         self.add(CmdIC())
         self.add(CmdOOC())
+
 
 class CmdIC(Command):
     """

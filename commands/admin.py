@@ -7,6 +7,7 @@ from .command import Command
 
 HELP_CATEGORY = "admin"
 
+
 class AdminCmdSet(CmdSet):
     """
     Commands for game administrators.
@@ -19,6 +20,7 @@ class AdminCmdSet(CmdSet):
     def at_cmdset_creation(self):
         super().at_cmdset_creation()
         self.add(CmdEmit())
+
 
 class AdminAccountCmdSet(CmdSet):
     """
@@ -33,6 +35,7 @@ class AdminAccountCmdSet(CmdSet):
         super().at_cmdset_creation()
         self.add(CmdPuppet())
         self.add(CmdUnpuppet())
+
 
 class CmdEmit(Command):
     """
@@ -202,6 +205,7 @@ class CmdPuppet(Command):
                 f"Puppet Failed: %s (Caller: {account}, Target: {new_character}, IP:"
                 f" {self.session.address})."
             )
+
 
 # Unpuppet has the same logic as Evennia default "ooc" command
 class CmdUnpuppet(default_cmds.account.CmdOOC):

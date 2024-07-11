@@ -48,7 +48,6 @@ import os
 from pathlib import Path
 import yaml
 from django.conf import settings
-from evennia.utils import logger
 
 HELP_FILES_DIR = Path(__file__).parent.joinpath("help").resolve()
 

@@ -523,7 +523,6 @@ class CmdSubmit(Command):
             caller.msg(
                 "This command can only be used in Character Generation areas.")
             return
-        args = self.args
 
         if caller.db.submitted:
             caller.msg("|wSTATS>|n You have already submitted an application.")
