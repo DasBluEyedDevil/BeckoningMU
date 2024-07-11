@@ -40,7 +40,7 @@ class Exit(ObjectParent, DefaultExit):
     def get_display_name(self, looker=None, **kwargs):
         # helper to create a clickable link
         def make_link(cmd, text):
-            return f"|lc {cmd}|lt{text}|le"
+            return f"|lc{cmd}|lt{text}|le"
 
         # create clickable link from name
         name_link = make_link(self.name, self.name)
@@ -48,8 +48,8 @@ class Exit(ObjectParent, DefaultExit):
         # list the first alias next to the full name of the exit.
         if aliases:
             alias = min(aliases, key=len)
-            alias_link = make_link(alias, f"|w{alias.upper()}|n")
-            return f"<{alias_link}>  {name_link}"
+            alias_link = make_link(alias, f"{alias.upper()}")
+            return f"<|w{alias_link}|n>  {name_link}"
         else:
             return name_link
 
