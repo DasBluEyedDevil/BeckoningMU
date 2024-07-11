@@ -2,6 +2,7 @@ from evennia.commands.cmdset import CmdSet
 from evennia import utils
 from evennia.utils import logger
 from .command import Command
+from django.conf import settings
 
 HELP_CATEGORY = "character"
 
@@ -23,6 +24,9 @@ class CharacterManagementCmdSet(CmdSet):
         # use default IC command and move to "character" help category
         self.add(CmdIC())
         self.add(CmdOOC())
+        self.add(CmdCharacterList())
+        self.add(CmdCharacterCreate())
+        self.add(CmdCharacterDelete())
 
 
 class CmdIC(Command):
@@ -43,8 +47,6 @@ class CmdIC(Command):
     help_category = HELP_CATEGORY
     # lock must be all() for different puppeted objects to access it.
     locks = "cmd:all()"
-    # this is used by the parent
-    account_caller = True
 
     def func(self):
         account = self.account
@@ -114,11 +116,8 @@ class CmdOOC(Command):
     """
 
     key = "ooc"
-    locks = "cmd:pperm(Player)"
+    locks = "cmd:all()"
     help_category = HELP_CATEGORY
-
-    # this is used by the parent
-    account_caller = True
 
     def func(self):
 
@@ -151,3 +150,161 @@ class CmdOOC(Command):
                 f" {self.session.address})."
             )
 
+
+class CmdCharacterList(Command):
+    """
+    """
+
+    key = "character list"
+    aliases = ("character", "characters", "char", "chars", "char list", "charlist")
+    locks = "cmd:all()"
+    help_category = HELP_CATEGORY
+
+    def func(self):
+
+        # multiple targets - this is a list of characters
+        characters = [char for char in self.account.characters if not char.tags.has("ooc")] 
+
+        num_chars = len(characters)
+
+        if not characters:
+            self.msg("You don't have a character yet. Use |w|lc help character create|lt character create|le|n.")
+            return
+
+        max_chars = (
+            "unlimited"
+            if settings.MAX_NR_CHARACTERS is None
+            else settings.MAX_NR_CHARACTERS
+        )
+
+        sessions = self.account.sessions.all()
+
+        char_strings = []
+        for char in characters:
+            char_sessions = char.sessions.all()
+            if char_sessions:
+                for sess in char_sessions:
+                    # character is already puppeted
+                    if sess in sessions:
+                        ip_addr = sess.address[0] if isinstance(sess.address, tuple) else sess.address
+                        addr = f"{sess.protocol_key} ({ip_addr})"
+                        char_strings.append(
+                            f" - |G{char.name}|n - " 
+                            f"played by you in session {sess.id} ({addr})"
+                        )
+                    else:
+                        char_strings.append(
+                            f" - |R{char.name}|n"
+                            "(played by someone else)"
+                        )
+            else:
+                # character is "free to puppet"
+                char_strings.append(f" - {char.name}")
+
+        self.msg(
+            f"Available character(s) ({num_chars}/{max_chars}, |lc help ic |lt |wic <name>|n|le to play):|n\n"
+            + "\n".join(char_strings)
+        )
+
+
+class CmdCharacterCreate(Command):
+    """
+    """
+
+    key = "character create"
+    aliases = ("char create", "charcreate")
+    locks = "cmd:pperm(Player)"
+    help_category = HELP_CATEGORY
+
+    character_typeclass = "typeclasses.characters.Character"
+
+    def func(self):
+        if not self.args:
+            self.msg("Usage: charcter create <charname> [= description]")
+            return
+        key = self.lhs
+        description = self.rhs or "Use |lc help desc |lt |wdesc|n |le to set a description." 
+
+        new_character, errors = self.account.create_character(
+            key=key,
+            description=description,
+            ip=self.session.address,
+            typeclass=self.character_typeclass,
+        )
+
+        if errors:
+            self.msg("\n".join(errors))
+        if not new_character:
+            return
+
+        self.msg(
+            f"Created new character {new_character.key}.\nUse |lc ic {new_character.key}|lt |wic {new_character.key}|n |le to play"
+            " as this character."
+        )
+
+
+class CmdCharacterDelete(Command):
+    """
+    delete a character - this cannot be undone!
+
+    Usage:
+        character delete <charname>
+
+    Permanently deletes one of your characters.
+    """
+
+    key = "character delete"
+    aliases = ("character del", "char delete", "char del", "chardelete", "chardel")
+    locks = "cmd:pperm(Player)"
+    help_category = HELP_CATEGORY
+
+    def func(self):
+        if not self.args:
+            self.msg("Usage: charcter delete <charname>")
+            return
+
+        account = self.account
+
+        # use the playable_characters list to search
+        match = [
+            char
+            for char in utils.make_iter(account.characters)
+            if char.key.lower() == self.args.lower() and not char.tags.has("ooc")
+        ]
+        if not match:
+            self.msg("You have no such character to delete.")
+            return
+        elif len(match) > 1:
+            self.msg(
+                "Aborting - there are two characters with the same name. Ask an admin to delete the"
+                " right one."
+            )
+            return
+        else:  # one match
+            from evennia.utils.evmenu import get_input
+
+            def _callback(caller, callback_prompt, result):
+                if result.lower() == "yes":
+                    # only take action
+                    delobj = caller.ndb._char_to_delete
+                    key = delobj.key
+                    caller.characters.remove(delobj)
+                    delobj.delete()
+                    self.msg(f"Character '{key}' was permanently deleted.")
+                    logger.log_sec(
+                        f"Character Deleted: {key} (Caller: {account}, IP: {self.session.address})."
+                    )
+                else:
+                    self.msg("Deletion was aborted.")
+                del caller.ndb._char_to_delete
+
+            match = match[0]
+            account.ndb._char_to_delete = match
+
+            # Return if caller has no permission to delete this
+            if not match.access(account, "delete"):
+                self.msg("You do not have permission to delete this character.")
+                return
+
+            prompt = f"|rThis will permanently destroy '{match.key}'. This cannot be undone.|n Continue yes/[no]?"
+            get_input(account, prompt, _callback)
