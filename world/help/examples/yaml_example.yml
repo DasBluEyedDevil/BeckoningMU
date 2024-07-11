@@ -1,0 +1,7 @@
+aliases: [yaml_example_alias]
+text: This is a help file example
+---
+key: yaml_example2
+category: examples
+locks: read:perm(Developer)
+text: This is a help file example

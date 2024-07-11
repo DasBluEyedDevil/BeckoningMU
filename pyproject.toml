@@ -7,6 +7,7 @@ readme = "README.md"
 python = "^3.11"
 evennia = "^4.1.1"
 gitpython = "^3.1.43"
+pyyaml = "^6.0.1"
 
 [build-system]
 requires = ["poetry-core"]
