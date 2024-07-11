@@ -202,7 +202,7 @@ class CmdCharacterList(Command):
                 char_strings.append(f" - {char.name}")
 
         self.msg(
-            f"Available character(s) ({num_chars}/{max_chars}, |lc help ic |lt |wic <name>|n|le to play):|n\n"
+            f"Available character(s) ({num_chars}/{max_chars}, |lc help ic |lt |wic <name>|n |le to play):|n\n"
             + "\n".join(char_strings)
         )
 
