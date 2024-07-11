@@ -1,5 +1,6 @@
-key: "building"
-category: "building"
+key: building guide
+category: building
+locks: read:perm(Builder)
 text: | 
     Evennia comes with a bunch of default building commands. You can
     find a beginner tutorial in the Evennia documentation.

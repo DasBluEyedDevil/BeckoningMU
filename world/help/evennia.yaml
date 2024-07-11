@@ -1,7 +1,7 @@
-key: "evennia"
-aliases: ["ev"]
-category: "Development"
-locks: "read:perm(Developer)"
+key: evennia
+aliases: [ev]
+category: Development
+locks: read:perm(Developer)
 text: |
     Evennia is a MU-game server and framework written in Python. You can read more
     on https://www.evennia.com.
