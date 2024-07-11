@@ -187,7 +187,7 @@ class CmdCharacterList(Command):
                     # character is already puppeted
                     if sess in sessions:
                         ip_addr = sess.address[0] if isinstance(sess.address, tuple) else sess.address
-                        addr = f"{sess.protocol_key} ({ip_addr})"
+                        addr = f"{sess.protocol_key} {ip_addr}"
                         char_strings.append(
                             f" - |G{char.name}|n - " 
                             f"played by you in session {sess.id} ({addr})"
