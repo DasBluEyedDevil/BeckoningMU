@@ -163,7 +163,7 @@ class CmdCharacterList(Command):
     def func(self):
 
         # multiple targets - this is a list of characters
-        characters = [char for char in self.account.characters if not char.tags.has("ooc")] 
+        characters = [char for char in self.account.characters if not char.tags.has("ooc")]
 
         num_chars = len(characters)
 
@@ -189,7 +189,7 @@ class CmdCharacterList(Command):
                         ip_addr = sess.address[0] if isinstance(sess.address, tuple) else sess.address
                         addr = f"{sess.protocol_key} {ip_addr}"
                         char_strings.append(
-                            f" - |G{char.name}|n - " 
+                            f" - |G{char.name}|n - "
                             f"played by you in session {sess.id} ({addr})"
                         )
                     else:
@@ -223,7 +223,7 @@ class CmdCharacterCreate(Command):
             self.msg("Usage: charcter create <charname> [= description]")
             return
         key = self.lhs
-        description = self.rhs or "Use |lc help desc |lt |wdesc|n |le to set a description." 
+        description = self.rhs or "Use |lc help desc |lt |wdesc|n |le to set a description."
 
         new_character, errors = self.account.create_character(
             key=key,
