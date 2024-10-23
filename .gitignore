@@ -51,6 +51,3 @@ nosetests.xml
 
 # PyCharm config
 .idea
-
-#Ruff
-.ruff_cache
