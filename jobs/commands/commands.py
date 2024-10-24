@@ -13,6 +13,17 @@ HELP_CATEGORY = "jobs"
 COMMAND_DEFAULT_CLASS = class_from_module(settings.COMMAND_DEFAULT_CLASS)
 
 
+from jobs.models import Bucket
+from evennia.accounts.models import AccountDB
+from evennia.utils import class_from_module
+from evennia.utils.ansi import ANSIString
+from django.conf import settings
+
+HELP_CATEGORY = "jobs"
+
+COMMAND_DEFAULT_CLASS = class_from_module(settings.COMMAND_DEFAULT_CLASS)
+
+
 class CmdBucket(COMMAND_DEFAULT_CLASS):
     """
     Manage job buckets.
@@ -24,7 +35,6 @@ class CmdBucket(COMMAND_DEFAULT_CLASS):
         bucket/delete <name>
         bucket/list
     """
-    pass
     key = "bucket"
     locks = "cmd:perm(bucket) or perm(Builder)"
     aliases = ["+bucket", "buckets", "+buckets"]
@@ -100,16 +110,33 @@ class CmdBucket(COMMAND_DEFAULT_CLASS):
         if not buckets:
             self.caller.msg("|wJOBS>|n No buckets exist.")
             return
-       # -------------------------------------------------------------------------------
-       #  ID    Name                DESCRIPTION                                    Jobs
+
+        # Calculate dynamic widths for columns
+        max_id_width = max(len(str(bucket.id)) for bucket in buckets)
+        max_name_width = max(len(bucket.name) for bucket in buckets)
+        max_desc_width = max(len(bucket.description) for bucket in buckets)
+        
+        # Ensure minimum widths for readability
+        max_id_width = max(max_id_width, 2)  # ID
+        max_name_width = max(max_name_width, 4)  # Name
+        max_desc_width = max(max_desc_width, 13)  # Description
+
+        # Adjust widths to fit within the total width (78 characters)
+        total_width = max_id_width + max_name_width + max_desc_width + 12
+        if total_width > 78:
+            excess_width = total_width - 78
+            max_desc_width -= excess_width
+
         output = ANSIString(" Buckets ").center(78, ANSIString("|R=|n")) + "\n"
         output += ANSIString(
-            " |CID    Name                DESCRIPTION                                   Jobs|n ") + "\n"
+            f" |CID{'':<{max_id_width}}  Name{'':<{max_name_width}}  DESCRIPTION{'':<{max_desc_width}}   Jobs|n "
+        ) + "\n"
         output += ANSIString("|R-|n" * 78) + "\n"
 
         for bucket in buckets:
             output += ANSIString(
-                f" #{bucket.id:<5}{bucket.name.upper():<17}   {bucket.description:<41}     {bucket.jobs.count():>4}") + "\n"
+                f" #{bucket.id:<{max_id_width+1}}{bucket.name.upper():<{max_name_width+2}} {bucket.description:<{max_desc_width+2}}   {bucket.jobs.count():>4}"
+            ) + "\n"
 
         output += ANSIString("|R-|n" * 78) + "\n"
         output += "Type +bucket/view <name> to view a bucket.\n"
