@@ -104,19 +104,22 @@ class CmdBucket(COMMAND_DEFAULT_CLASS):
         max_id_width = max(len(str(bucket.id)) for bucket in buckets)
         max_name_width = max(len(bucket.name) for bucket in buckets)
         max_desc_width = max(len(bucket.description) for bucket in buckets)
-        
-        # Ensure minimum widths for readability
-        max_id_width = max(max_id_width, 2)  # ID
-        max_name_width = max(max_name_width, 4)  # Name
-        max_desc_width = max(max_desc_width, 13)  # Description
 
-        # Adjust widths to fit within the total width (78 characters)
-        total_width = max_id_width + max_name_width + max_desc_width + 12
+        # Ensure minimum widths for readability (including header text)
+        max_id_width = max(max_id_width, 2)    # ID
+        max_name_width = max(max_name_width, 4)  # Name
+        max_desc_width = max(max_desc_width, 11) # DESCRIPTION
+
+        # Adjust widths to fit within the total width (78 characters),
+        # accounting for spaces and '#' in the ID column
+        total_width = max_id_width + max_name_width + max_desc_width + 13
         if total_width > 78:
             excess_width = total_width - 78
             max_desc_width -= excess_width
 
         output = ANSIString(" Buckets ").center(78, ANSIString("|R=|n")) + "\n"
+        
+        # Use f-string formatting for the header as well
         output += ANSIString(
             f" |CID{'':<{max_id_width}}  Name{'':<{max_name_width}}  DESCRIPTION{'':<{max_desc_width}}   Jobs|n "
         ) + "\n"
