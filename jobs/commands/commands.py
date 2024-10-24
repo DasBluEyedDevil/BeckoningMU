@@ -13,17 +13,6 @@ HELP_CATEGORY = "jobs"
 COMMAND_DEFAULT_CLASS = class_from_module(settings.COMMAND_DEFAULT_CLASS)
 
 
-from jobs.models import Bucket
-from evennia.accounts.models import AccountDB
-from evennia.utils import class_from_module
-from evennia.utils.ansi import ANSIString
-from django.conf import settings
-
-HELP_CATEGORY = "jobs"
-
-COMMAND_DEFAULT_CLASS = class_from_module(settings.COMMAND_DEFAULT_CLASS)
-
-
 class CmdBucket(COMMAND_DEFAULT_CLASS):
     """
     Manage job buckets.
